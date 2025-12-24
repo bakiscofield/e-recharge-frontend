@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Valeurs par défaut - Seront remplacées dynamiquement par AppConfigProvider */
+  --color-primary: #3B82F6;
+  --color-secondary: #10B981;
+  --color-accent: #F59E0B;
+  --color-background: #FFFFFF;
+  --color-text: #1F2937;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+@layer utilities {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Classes utilisant les couleurs dynamiques */
+  .bg-app-primary {
+    background-color: var(--color-primary);
+  }
+
+  .bg-app-secondary {
+    background-color: var(--color-secondary);
+  }
+
+  .bg-app-accent {
+    background-color: var(--color-accent);
+  }
+
+  .text-app-primary {
+    color: var(--color-primary);
+  }
+
+  .text-app-secondary {
+    color: var(--color-secondary);
+  }
+
+  .text-app-accent {
+    color: var(--color-accent);
+  }
+
+  .border-app-primary {
+    border-color: var(--color-primary);
+  }
+
+  .border-app-secondary {
+    border-color: var(--color-secondary);
+  }
+
+  .hover\:bg-app-primary:hover {
+    background-color: var(--color-primary);
+  }
+
+  .hover\:text-app-primary:hover {
+    color: var(--color-primary);
+  }
+}
