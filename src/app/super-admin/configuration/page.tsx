@@ -236,7 +236,7 @@ export default function ConfigurationPage() {
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">🎨 Image de marque</h2>
-                    <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition" onClick={saveBranding} loading={saving}>
+                    <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed" onClick={saveBranding} disabled={saving}>
                       <Save className="w-4 h-4 mr-2" />
                       Sauvegarder
                     </button>
@@ -535,7 +535,7 @@ export default function ConfigurationPage() {
                     </div>
 
                     <div className="flex gap-3 mt-6">
-                      <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition" onClick={saveBookmaker} loading={saving}>
+                      <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed" onClick={saveBookmaker} disabled={saving}>
                         Sauvegarder
                       </button>
                       <button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-medium transition" onClick={() => setEditingBookmaker(null)}>
@@ -759,7 +759,7 @@ export default function ConfigurationPage() {
                     </div>
 
                     <div className="flex gap-3 mt-6">
-                      <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition" onClick={savePaymentMethod} loading={saving}>
+                      <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed" onClick={savePaymentMethod} disabled={saving}>
                         Sauvegarder
                       </button>
                       <button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-medium transition" onClick={() => setEditingPayment(null)}>
