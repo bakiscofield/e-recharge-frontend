@@ -393,7 +393,6 @@ export default function ConfigurationPage() {
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">🎰 Bookmakers</h2>
                     <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition"
-                      variant="primary"
                       onClick={() => setEditingBookmaker({ name: '', isActive: true, priority: 0 })}
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -562,7 +561,6 @@ export default function ConfigurationPage() {
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">💳 Méthodes de paiement</h2>
                     <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition"
-                      variant="primary"
                       onClick={() => setEditingPayment({
                         name: '',
                         type: 'MOBILE_MONEY',
