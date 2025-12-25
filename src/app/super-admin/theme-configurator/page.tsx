@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { SuperAdminLayout } from '@/components/Layout/SuperAdminLayout';
 import api from '@/lib/api';
-import type { ThemeConfig } from '../../../../../shared/types';
+import type { ThemeConfig } from '@/types/shared';
 
 export default function ThemeConfigurator() {
   const [theme, setTheme] = useState<Partial<ThemeConfig>>({
