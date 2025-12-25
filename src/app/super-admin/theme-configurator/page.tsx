@@ -132,17 +132,15 @@ export default function ThemeConfigurator() {
           </div>
           <div className="flex gap-4">
             <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition"
-              variant="secondary"
               onClick={() => setPreviewMode(previewMode === 'desktop' ? 'mobile' : 'desktop')}
             >
               {previewMode === 'desktop' ? '📱 Mobile' : '🖥️ Desktop'}
             </button>
-            <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition"
-              variant="success"
+            <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleSave}
-              loading={saving}
+              disabled={saving}
             >
-              💾 Sauvegarder
+              💾 {saving ? 'Sauvegarde...' : 'Sauvegarder'}
             </button>
           </div>
         </motion.div>
