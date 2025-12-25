@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -10,7 +11,6 @@ export const metadata: Metadata = {
   title: 'AliceBot - Dépôts & Retraits Bookmaker',
   description: 'Votre partenaire de confiance pour vos transactions bookmaker',
   manifest: '/manifest.json',
-  themeColor: '#3B82F6',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -54,6 +54,7 @@ export default function RootLayout({
       </head>
       <body className={inter.variable}>
         <Providers>
+          <ServiceWorkerRegistration />
           {children}
           <Toaster position="top-center" />
         </Providers>

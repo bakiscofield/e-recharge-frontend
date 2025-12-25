@@ -10,16 +10,20 @@ import { AppConfigProvider } from '@/components/AppConfigProvider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    // Charger les données de session
     store.dispatch(loadFromStorage());
     store.dispatch(fetchConfig());
-    
-    // Charger le compteur de notifications et le rafraîchir toutes les 30 secondes
-    store.dispatch(fetchUnreadCount());
-    const interval = setInterval(() => {
+
+    // Charger le compteur de notifications uniquement si l'utilisateur est connecté
+    const token = localStorage.getItem('token');
+    if (token) {
       store.dispatch(fetchUnreadCount());
-    }, 30000);
-    
-    return () => clearInterval(interval);
+      const interval = setInterval(() => {
+        store.dispatch(fetchUnreadCount());
+      }, 30000);
+
+      return () => clearInterval(interval);
+    }
   }, []);
 
   return (

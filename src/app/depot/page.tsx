@@ -197,9 +197,6 @@ export default function DepotPage() {
                       }`}
                     >
                       <div className="flex flex-col items-center gap-2">
-                        {bm.logo && (
-                          <img src={bm.logo} alt={bm.name} className="h-12 w-auto object-contain" />
-                        )}
                         <div className="font-semibold text-sm">{bm.name}</div>
                       </div>
                     </button>
@@ -236,9 +233,6 @@ export default function DepotPage() {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        {pm.logo && (
-                          <img src={pm.logo} alt={pm.name} className="h-8 w-auto object-contain" />
-                        )}
                         <span className="font-medium">{pm.name}</span>
                       </div>
                     </button>

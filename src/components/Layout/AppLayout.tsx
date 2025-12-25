@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import { useAppConfig } from '@/hooks/useAppConfig';
+import FallingSymbols from '@/components/Animations/FallingSymbols';
 import {
   Home,
   ArrowDownCircle,
@@ -54,7 +55,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
   if (!token) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-20 relative">
+      {/* Animation d'arrière-plan */}
+      <FallingSymbols />
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 safe-top">
         <div className="px-4 py-4">
@@ -101,7 +105,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </header>
 
       {/* Content */}
-      <main className="p-4">{children}</main>
+      <main className="p-4 relative z-1">{children}</main>
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-bottom z-20">

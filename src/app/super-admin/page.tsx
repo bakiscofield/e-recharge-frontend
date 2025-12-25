@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { SuperAdminLayout } from '@/components/Layout/SuperAdminLayout';
 import api from '@/lib/api';
+import toast from 'react-hot-toast';
+import { Search, Edit2, Trash2, UserPlus, Eye, EyeOff, X } from 'lucide-react';
 
 interface Statistics {
   users: {
@@ -26,14 +28,77 @@ interface Statistics {
   };
 }
 
+interface Admin {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+interface User {
+  id: string;
+  email?: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  role: string;
+  isActive: boolean;
+  country: string;
+  createdAt: string;
+  referralCode?: string;
+}
+
 export default function SuperAdminDashboard() {
   const [statistics, setStatistics] = useState<Statistics | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'admins' | 'users' | 'config' | 'theme'>('overview');
   const [loading, setLoading] = useState(true);
 
+  // Admin management states
+  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [adminSearch, setAdminSearch] = useState('');
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
+  const [adminFormData, setAdminFormData] = useState({
+    email: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    password: '',
+    role: 'ADMIN',
+  });
+
+  // User management states
+  const [users, setUsers] = useState<User[]>([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [userRoleFilter, setUserRoleFilter] = useState<string>('ALL');
+  const [userCountryFilter, setUserCountryFilter] = useState<string>('ALL');
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState(false);
+  const [userFormData, setUserFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: '',
+    country: '',
+    role: '',
+  });
+
   useEffect(() => {
     fetchStatistics();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'admins') {
+      fetchAdmins();
+    } else if (activeTab === 'users') {
+      fetchUsers();
+    }
+  }, [activeTab]);
 
   const fetchStatistics = async () => {
     try {
@@ -45,6 +110,177 @@ export default function SuperAdminDashboard() {
       setLoading(false);
     }
   };
+
+  // Admin Management Functions
+  const fetchAdmins = async () => {
+    try {
+      const response = await api.get('/super-admin/admins');
+      setAdmins(Array.isArray(response.data) ? response.data : []);
+    } catch (error: any) {
+      toast.error('Erreur lors du chargement des admins');
+      console.error(error);
+      setAdmins([]);
+    }
+  };
+
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post('/super-admin/admins', adminFormData);
+      toast.success('Admin créé avec succès');
+      setShowAdminModal(false);
+      resetAdminForm();
+      fetchAdmins();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Erreur lors de la création');
+    }
+  };
+
+  const handleUpdateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAdmin) return;
+    try {
+      await api.put(`/super-admin/admins/${editingAdmin.id}`, {
+        firstName: adminFormData.firstName,
+        lastName: adminFormData.lastName,
+        phone: adminFormData.phone,
+        email: adminFormData.email,
+      });
+      toast.success('Admin mis à jour avec succès');
+      setShowAdminModal(false);
+      resetAdminForm();
+      fetchAdmins();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour');
+    }
+  };
+
+  const handleToggleAdminStatus = async (adminId: string, currentStatus: boolean) => {
+    try {
+      await api.put(`/super-admin/admins/${adminId}/status`, { isActive: !currentStatus });
+      toast.success(`Admin ${!currentStatus ? 'activé' : 'désactivé'} avec succès`);
+      fetchAdmins();
+    } catch (error: any) {
+      toast.error('Erreur lors du changement de statut');
+    }
+  };
+
+  const handleDeleteAdmin = async (adminId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet admin ?')) return;
+    try {
+      await api.delete(`/super-admin/admins/${adminId}`);
+      toast.success('Admin supprimé avec succès');
+      fetchAdmins();
+    } catch (error: any) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const openEditAdminModal = (admin: Admin) => {
+    setEditingAdmin(admin);
+    setAdminFormData({
+      email: admin.email,
+      firstName: admin.firstName,
+      lastName: admin.lastName,
+      phone: admin.phone,
+      password: '',
+      role: admin.role,
+    });
+    setShowAdminModal(true);
+  };
+
+  const resetAdminForm = () => {
+    setAdminFormData({
+      email: '',
+      firstName: '',
+      lastName: '',
+      phone: '',
+      password: '',
+      role: 'ADMIN',
+    });
+    setEditingAdmin(null);
+  };
+
+  // User Management Functions
+  const fetchUsers = async () => {
+    try {
+      const response = await api.get('/super-admin/users');
+      setUsers(Array.isArray(response.data) ? response.data : []);
+    } catch (error: any) {
+      toast.error('Erreur lors du chargement des utilisateurs');
+      console.error(error);
+      setUsers([]);
+    }
+  };
+
+  const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
+    try {
+      await api.put(`/super-admin/users/${userId}/status`, { isActive: !currentStatus });
+      toast.success(`Utilisateur ${!currentStatus ? 'activé' : 'désactivé'} avec succès`);
+      fetchUsers();
+    } catch (error: any) {
+      toast.error('Erreur lors du changement de statut');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return;
+    try {
+      await api.delete(`/super-admin/users/${userId}`);
+      toast.success('Utilisateur supprimé avec succès');
+      fetchUsers();
+    } catch (error: any) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser) return;
+    try {
+      await api.put(`/super-admin/users/${selectedUser.id}`, userFormData);
+      toast.success('Utilisateur mis à jour avec succès');
+      setEditingUser(false);
+      setShowUserModal(false);
+      setSelectedUser(null);
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour');
+    }
+  };
+
+  const openUserDetails = (user: User, editMode = false) => {
+    setSelectedUser(user);
+    setUserFormData({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      email: user.email || '',
+      country: user.country,
+      role: user.role,
+    });
+    setEditingUser(editMode);
+    setShowUserModal(true);
+  };
+
+  // Filtered data
+  const filteredAdmins = admins.filter(admin =>
+    `${admin.firstName} ${admin.lastName} ${admin.email} ${admin.phone}`
+      .toLowerCase()
+      .includes(adminSearch.toLowerCase())
+  );
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = `${user.firstName} ${user.lastName} ${user.email || ''} ${user.phone}`
+      .toLowerCase()
+      .includes(userSearch.toLowerCase());
+    const matchesRole = userRoleFilter === 'ALL' || user.role === userRoleFilter;
+    const matchesCountry = userCountryFilter === 'ALL' || user.country === userCountryFilter;
+    return matchesSearch && matchesRole && matchesCountry;
+  });
+
+  // Get unique countries from users
+  const uniqueCountries = Array.from(new Set(users.map(u => u.country)));
 
   const tabs = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: '📊' },
@@ -236,17 +472,95 @@ export default function SuperAdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-900">Gestion des Admins</h2>
-                <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition">
-                  <span className="mr-2">➕</span>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestion des Admins</h2>
+                <button
+                  onClick={() => {
+                    resetAdminForm();
+                    setShowAdminModal(true);
+                  }}
+                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition flex items-center gap-2"
+                >
+                  <UserPlus className="h-5 w-5" />
                   Nouveau Admin
                 </button>
               </div>
-              <p className="text-gray-600 text-center py-12">
-                Interface de gestion des admins (à implémenter)
-              </p>
+
+              {/* Search */}
+              <div className="mb-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher un admin..."
+                    value={adminSearch}
+                    onChange={(e) => setAdminSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Admins List */}
+              <div className="space-y-3">
+                {filteredAdmins.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    {adminSearch ? 'Aucun admin trouvé' : 'Aucun admin pour le moment'}
+                  </div>
+                ) : (
+                  filteredAdmins.map((admin) => (
+                    <div key={admin.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="font-bold text-gray-900">
+                              {admin.firstName} {admin.lastName}
+                            </h3>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              admin.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                              {admin.isActive ? 'Actif' : 'Inactif'}
+                            </span>
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                              {admin.role}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <p>📧 {admin.email}</p>
+                            <p>📱 {admin.phone}</p>
+                            <p className="text-xs text-gray-400">Créé le {new Date(admin.createdAt).toLocaleDateString('fr-FR')}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openEditAdminModal(admin)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                            title="Modifier"
+                          >
+                            <Edit2 className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleToggleAdminStatus(admin.id, admin.isActive)}
+                            className={`p-2 rounded-lg transition ${
+                              admin.isActive ? 'text-orange-600 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'
+                            }`}
+                            title={admin.isActive ? 'Désactiver' : 'Activer'}
+                          >
+                            {admin.isActive ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAdmin(admin.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </motion.div>
         )}
@@ -257,11 +571,118 @@ export default function SuperAdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Gestion des Utilisateurs</h2>
-              <p className="text-gray-600 text-center py-12">
-                Interface de gestion des utilisateurs (à implémenter)
-              </p>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Gestion des Utilisateurs</h2>
+
+              {/* Search and Filters */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher un utilisateur..."
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <select
+                  value={userRoleFilter}
+                  onChange={(e) => setUserRoleFilter(e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="ALL">Tous les rôles</option>
+                  <option value="CLIENT">Clients</option>
+                  <option value="AGENT">Agents</option>
+                  <option value="ADMIN">Admins</option>
+                </select>
+                <select
+                  value={userCountryFilter}
+                  onChange={(e) => setUserCountryFilter(e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="ALL">Tous les pays</option>
+                  {uniqueCountries.map(country => (
+                    <option key={country} value={country}>{country}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Users List */}
+              <div className="space-y-3">
+                {filteredUsers.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    {userSearch || userRoleFilter !== 'ALL' ? 'Aucun utilisateur trouvé' : 'Aucun utilisateur pour le moment'}
+                  </div>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <div key={user.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2 flex-wrap">
+                            <h3 className="font-bold text-gray-900">
+                              {user.firstName} {user.lastName}
+                            </h3>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                              {user.isActive ? 'Actif' : 'Inactif'}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              user.role === 'CLIENT' ? 'bg-blue-100 text-blue-700' :
+                              user.role === 'AGENT' ? 'bg-purple-100 text-purple-700' :
+                              'bg-orange-100 text-orange-700'
+                            }`}>
+                              {user.role}
+                            </span>
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                              {user.country}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-600 space-y-1">
+                            {user.email && <p>📧 {user.email}</p>}
+                            <p>📱 {user.phone}</p>
+                            {user.referralCode && <p>🎁 Code parrainage: {user.referralCode}</p>}
+                            <p className="text-xs text-gray-400">Inscrit le {new Date(user.createdAt).toLocaleDateString('fr-FR')}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openUserDetails(user, false)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                            title="Voir détails"
+                          >
+                            <Eye className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => openUserDetails(user, true)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                            title="Modifier"
+                          >
+                            <Edit2 className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleToggleUserStatus(user.id, user.isActive)}
+                            className={`p-2 rounded-lg transition ${
+                              user.isActive ? 'text-orange-600 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'
+                            }`}
+                            title={user.isActive ? 'Désactiver' : 'Activer'}
+                          >
+                            {user.isActive ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </motion.div>
         )}
@@ -450,6 +871,320 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
           </motion.div>
+        )}
+
+        {/* Admin Modal */}
+        {showAdminModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-md"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {editingAdmin ? 'Modifier Admin' : 'Nouvel Admin'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAdminModal(false);
+                    resetAdminForm();
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={editingAdmin ? handleUpdateAdmin : handleCreateAdmin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                  <input
+                    type="text"
+                    value={adminFormData.firstName}
+                    onChange={(e) => setAdminFormData({ ...adminFormData, firstName: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                  <input
+                    type="text"
+                    value={adminFormData.lastName}
+                    onChange={(e) => setAdminFormData({ ...adminFormData, lastName: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={adminFormData.email}
+                    onChange={(e) => setAdminFormData({ ...adminFormData, email: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                    disabled={!!editingAdmin}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                  <input
+                    type="tel"
+                    value={adminFormData.phone}
+                    onChange={(e) => setAdminFormData({ ...adminFormData, phone: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {!editingAdmin && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                      <input
+                        type="password"
+                        value={adminFormData.password}
+                        onChange={(e) => setAdminFormData({ ...adminFormData, password: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
+                      <select
+                        value={adminFormData.role}
+                        onChange={(e) => setAdminFormData({ ...adminFormData, role: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      >
+                        <option value="ADMIN">Admin</option>
+                        <option value="AGENT">Agent</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAdminModal(false);
+                      resetAdminForm();
+                    }}
+                    className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition"
+                  >
+                    {editingAdmin ? 'Mettre à jour' : 'Créer'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* User Details/Edit Modal */}
+        {showUserModal && selectedUser && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {editingUser ? 'Modifier Utilisateur' : 'Détails Utilisateur'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowUserModal(false);
+                    setSelectedUser(null);
+                    setEditingUser(false);
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {!editingUser ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-2xl font-bold text-primary">
+                      {selectedUser.firstName[0]}{selectedUser.lastName[0]}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg text-gray-900">
+                        {selectedUser.firstName} {selectedUser.lastName}
+                      </h4>
+                      <p className="text-sm text-gray-600">{selectedUser.role}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-4 border-t">
+                    {selectedUser.email && (
+                      <div>
+                        <p className="text-sm text-gray-500">Email</p>
+                        <p className="font-medium text-gray-900">{selectedUser.email}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm text-gray-500">Téléphone</p>
+                      <p className="font-medium text-gray-900">{selectedUser.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Pays</p>
+                      <p className="font-medium text-gray-900">{selectedUser.country}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Rôle</p>
+                      <p className="font-medium text-gray-900">{selectedUser.role}</p>
+                    </div>
+                    {selectedUser.referralCode && (
+                      <div>
+                        <p className="text-sm text-gray-500">Code de parrainage</p>
+                        <p className="font-medium text-gray-900">{selectedUser.referralCode}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm text-gray-500">Statut</p>
+                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedUser.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {selectedUser.isActive ? 'Actif' : 'Inactif'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Date d'inscription</p>
+                      <p className="font-medium text-gray-900">
+                        {new Date(selectedUser.createdAt).toLocaleDateString('fr-FR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      onClick={() => setEditingUser(true)}
+                      className="flex-1 px-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUserModal(false);
+                        setSelectedUser(null);
+                      }}
+                      className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition"
+                    >
+                      Fermer
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleUpdateUser} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                    <input
+                      type="text"
+                      value={userFormData.firstName}
+                      onChange={(e) => setUserFormData({ ...userFormData, firstName: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                    <input
+                      type="text"
+                      value={userFormData.lastName}
+                      onChange={(e) => setUserFormData({ ...userFormData, lastName: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={userFormData.email}
+                      onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                    <input
+                      type="tel"
+                      value={userFormData.phone}
+                      onChange={(e) => setUserFormData({ ...userFormData, phone: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Pays</label>
+                    <select
+                      value={userFormData.country}
+                      onChange={(e) => setUserFormData({ ...userFormData, country: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      required
+                    >
+                      <option value="TG">Togo</option>
+                      <option value="BJ">Bénin</option>
+                      <option value="CI">Côte d'Ivoire</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
+                    <select
+                      value={userFormData.role}
+                      onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      required
+                    >
+                      <option value="CLIENT">Client</option>
+                      <option value="AGENT">Agent</option>
+                      <option value="ADMIN">Admin</option>
+                    </select>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setEditingUser(false)}
+                      className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition"
+                    >
+                      Enregistrer
+                    </button>
+                  </div>
+                </form>
+              )}
+            </motion.div>
+          </div>
         )}
       </div>
     </SuperAdminLayout>

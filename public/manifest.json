@@ -3,10 +3,15 @@
   "short_name": "AliceBot",
   "description": "Votre partenaire de confiance pour vos transactions bookmaker",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3B82F6",
   "orientation": "portrait-primary",
+  "categories": ["finance", "utilities", "business"],
+  "lang": "fr",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
