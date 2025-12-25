@@ -7,52 +7,6 @@ export function ServiceWorkerRegistration() {
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
-      'serviceWorker' in navigator &&
-      window.workbox !== undefined
-    ) {
-      const wb = window.workbox;
-
-      // Notification de mise à jour disponible
-      const promptNewVersionAvailable = (event: any) => {
-        toast(
-          (t) => (
-            <div className="flex flex-col gap-2">
-              <p className="font-medium">Une nouvelle version est disponible !</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    wb.addEventListener('controlling', () => {
-                      window.location.reload();
-                    });
-                    wb.messageSkipWaiting();
-                    toast.dismiss(t.id);
-                  }}
-                  className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium"
-                >
-                  Mettre à jour
-                </button>
-                <button
-                  onClick={() => toast.dismiss(t.id)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium"
-                >
-                  Plus tard
-                </button>
-              </div>
-            </div>
-          ),
-          {
-            duration: Infinity,
-            position: 'bottom-center',
-          }
-        );
-      };
-
-      wb.addEventListener('waiting', promptNewVersionAvailable);
-
-      // Register service worker
-      wb.register();
-    } else if (
-      typeof window !== 'undefined' &&
       'serviceWorker' in navigator
     ) {
       // Enregistrement manuel du Service Worker
@@ -64,7 +18,7 @@ export function ServiceWorkerRegistration() {
 
   const registerServiceWorker = async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+      const registration = await navigator.serviceWorker.register('/service-worker.js', {
         scope: '/',
       });
 
@@ -146,11 +100,4 @@ export function ServiceWorkerRegistration() {
   }, []);
 
   return null;
-}
-
-// Étendre le type Window pour TypeScript
-declare global {
-  interface Window {
-    workbox: any;
-  }
 }
