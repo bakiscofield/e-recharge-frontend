@@ -17,6 +17,8 @@ export default function DepotPage() {
   const [bookmakers, setBookmakers] = useState<any[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [agents, setAgents] = useState<any[]>([]);
+  const [savedIds, setSavedIds] = useState<any[]>([]);
+  const [useNewId, setUseNewId] = useState(false);
 
   const [formData, setFormData] = useState({
     country: user?.country || 'TG',
@@ -33,13 +35,17 @@ export default function DepotPage() {
 
   useEffect(() => {
     loadBookmakers();
+    loadSavedIds();
   }, [formData.country]);
 
   useEffect(() => {
     if (formData.bookmakerId) {
       loadPaymentMethods();
+      // Vérifier s'il y a des IDs enregistrés pour ce bookmaker
+      const hasIds = savedIds.some(id => id.bookmakerId === formData.bookmakerId);
+      setUseNewId(!hasIds);
     }
-  }, [formData.bookmakerId, formData.country]);
+  }, [formData.bookmakerId, formData.country, savedIds]);
 
   useEffect(() => {
     if (formData.bookmakerId && formData.paymentMethodId) {
@@ -58,6 +64,16 @@ export default function DepotPage() {
     } catch (error: any) {
       console.error('Error loading bookmakers:', error);
       toast.error(error.response?.data?.message || 'Erreur de chargement des bookmakers');
+    }
+  };
+
+  const loadSavedIds = async () => {
+    try {
+      const res = await api.get('/users/me/bookmaker-ids');
+      setSavedIds(res.data);
+    } catch (error: any) {
+      console.error('Error loading saved IDs:', error);
+      // Silent fail - IDs are optional
     }
   };
 
@@ -357,6 +373,91 @@ export default function DepotPage() {
                 onChange={(e) => setFormData({ ...formData, clientContact: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
               />
+            </div>
+
+            <div className="bg-white rounded-lg p-4 shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                <Building2 className="inline h-5 w-5 mr-2" />
+                ID {bookmakers.find(bm => bm.id === formData.bookmakerId)?.name || 'Bookmaker'}
+              </label>
+
+              {(() => {
+                const bookmakerId = formData.bookmakerId;
+                const availableIds = savedIds.filter(id => id.bookmakerId === bookmakerId);
+
+                if (availableIds.length > 0) {
+                  return (
+                    <div className="space-y-3">
+                      {/* Toggle entre ID enregistré et nouveau */}
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            checked={!useNewId}
+                            onChange={() => {
+                              setUseNewId(false);
+                              setFormData({ ...formData, bookmakerIdentifier: '' });
+                            }}
+                            className="w-4 h-4 text-primary focus:ring-primary"
+                          />
+                          <span className="text-sm">ID enregistré</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            checked={useNewId}
+                            onChange={() => {
+                              setUseNewId(true);
+                              setFormData({ ...formData, bookmakerIdentifier: '' });
+                            }}
+                            className="w-4 h-4 text-primary focus:ring-primary"
+                          />
+                          <span className="text-sm">Saisir un nouvel ID</span>
+                        </label>
+                      </div>
+
+                      {/* Sélecteur ou Input */}
+                      {!useNewId ? (
+                        <select
+                          value={formData.bookmakerIdentifier}
+                          onChange={(e) => setFormData({ ...formData, bookmakerIdentifier: e.target.value })}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                        >
+                          <option value="">Sélectionner un ID...</option>
+                          {availableIds.map((savedId) => (
+                            <option key={savedId.id} value={savedId.identifier}>
+                              {savedId.identifier} {savedId.label ? `(${savedId.label})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          value={formData.bookmakerIdentifier}
+                          onChange={(e) => setFormData({ ...formData, bookmakerIdentifier: e.target.value })}
+                          placeholder={`Ex: ID ${bookmakers.find(bm => bm.id === formData.bookmakerId)?.name || 'bookmaker'}`}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                        />
+                      )}
+                    </div>
+                  );
+                } else {
+                  // Pas d'IDs enregistrés, afficher directement l'input
+                  return (
+                    <input
+                      type="text"
+                      value={formData.bookmakerIdentifier}
+                      onChange={(e) => setFormData({ ...formData, bookmakerIdentifier: e.target.value })}
+                      placeholder={`Ex: ID ${bookmakers.find(bm => bm.id === formData.bookmakerId)?.name || 'bookmaker'}`}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                    />
+                  );
+                }
+              })()}
+
+              <p className="text-xs text-gray-500 mt-2">
+                Votre identifiant sur {bookmakers.find(bm => bm.id === formData.bookmakerId)?.name || 'le bookmaker'}
+              </p>
             </div>
 
             <div className="bg-white rounded-lg p-4 shadow-sm">
