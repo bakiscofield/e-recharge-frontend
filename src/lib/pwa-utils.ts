@@ -60,12 +60,18 @@ export class PWAUtils {
 
     return new Promise((resolve) => {
       const messageChannel = new MessageChannel();
+      const controller = navigator.serviceWorker.controller;
+
+      if (!controller) {
+        resolve(null);
+        return;
+      }
 
       messageChannel.port1.onmessage = (event) => {
         resolve(event.data.version || null);
       };
 
-      navigator.serviceWorker.controller.postMessage(
+      controller.postMessage(
         { type: 'GET_VERSION' },
         [messageChannel.port2]
       );
@@ -85,12 +91,18 @@ export class PWAUtils {
 
     return new Promise((resolve) => {
       const messageChannel = new MessageChannel();
+      const controller = navigator.serviceWorker.controller;
+
+      if (!controller) {
+        resolve(null);
+        return;
+      }
 
       messageChannel.port1.onmessage = (event) => {
         resolve(event.data as CacheSizes);
       };
 
-      navigator.serviceWorker.controller.postMessage(
+      controller.postMessage(
         { type: 'GET_CACHE_SIZES' },
         [messageChannel.port2]
       );
@@ -110,12 +122,18 @@ export class PWAUtils {
 
     return new Promise((resolve) => {
       const messageChannel = new MessageChannel();
+      const controller = navigator.serviceWorker.controller;
+
+      if (!controller) {
+        resolve(false);
+        return;
+      }
 
       messageChannel.port1.onmessage = (event) => {
         resolve(event.data.success || false);
       };
 
-      navigator.serviceWorker.controller.postMessage(
+      controller.postMessage(
         { type: 'CLEAR_CACHE' },
         [messageChannel.port2]
       );
@@ -135,12 +153,18 @@ export class PWAUtils {
 
     return new Promise((resolve) => {
       const messageChannel = new MessageChannel();
+      const controller = navigator.serviceWorker.controller;
+
+      if (!controller) {
+        resolve(false);
+        return;
+      }
 
       messageChannel.port1.onmessage = (event) => {
         resolve(event.data.success || false);
       };
 
-      navigator.serviceWorker.controller.postMessage(
+      controller.postMessage(
         { type: 'CLEAR_CACHE_BY_NAME', cacheName },
         [messageChannel.port2]
       );
@@ -249,7 +273,9 @@ export class PWAUtils {
     }
 
     try {
-      if (this.isServiceWorkerSupported() && navigator.serviceWorker.controller) {
+      const controller = navigator.serviceWorker?.controller;
+
+      if (this.isServiceWorkerSupported() && controller) {
         const registration = await navigator.serviceWorker.getRegistration();
 
         if (registration) {
