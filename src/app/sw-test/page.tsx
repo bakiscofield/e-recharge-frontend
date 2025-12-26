@@ -24,7 +24,7 @@ export default function ServiceWorkerTestPage() {
     updateAvailable: false,
   });
 
-  const [caches, setCaches] = useState<{ name: string; count: number }[]>([]);
+  const [cacheList, setCacheList] = useState<{ name: string; count: number }[]>([]);
   const [logs, setLogs] = useState<string[]>([]);
 
   const addLog = (message: string) => {
@@ -78,15 +78,15 @@ export default function ServiceWorkerTestPage() {
 
         // Récupérer les informations de cache
         if ('caches' in window) {
-          const cacheNames = await caches.keys();
+          const cacheNames = await window.caches.keys();
           const cacheData = await Promise.all(
             cacheNames.map(async (name) => {
-              const cache = await caches.open(name);
+              const cache = await window.caches.open(name);
               const keys = await cache.keys();
               return { name, count: keys.length };
             })
           );
-          setCaches(cacheData);
+          setCacheList(cacheData);
           addLog(`💾 ${cacheNames.length} cache(s) trouvé(s)`);
         }
       } catch (error) {
@@ -141,10 +141,10 @@ export default function ServiceWorkerTestPage() {
 
   const handleClearCaches = async () => {
     try {
-      const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      const cacheNames = await window.caches.keys();
+      await Promise.all(cacheNames.map((name) => window.caches.delete(name)));
       addLog(`✅ ${cacheNames.length} cache(s) supprimé(s)`);
-      setCaches([]);
+      setCacheList([]);
     } catch (error) {
       addLog(`❌ Erreur lors de la suppression des caches: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
@@ -246,10 +246,10 @@ export default function ServiceWorkerTestPage() {
 
                 <button
                   onClick={handleClearCaches}
-                  disabled={caches.length === 0}
+                  disabled={cacheList.length === 0}
                   className="w-full px-4 py-3 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
                 >
-                  🗑️ Vider les caches ({caches.length})
+                  🗑️ Vider les caches ({cacheList.length})
                 </button>
 
                 <button
@@ -271,13 +271,13 @@ export default function ServiceWorkerTestPage() {
           </div>
 
           {/* Caches */}
-          {caches.length > 0 && (
+          {cacheList.length > 0 && (
             <div className="border border-gray-200 rounded-lg p-6 mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                💾 Caches ({caches.length})
+                💾 Caches ({cacheList.length})
               </h2>
               <div className="space-y-2">
-                {caches.map((cache) => (
+                {cacheList.map((cache) => (
                   <div
                     key={cache.name}
                     className="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-200"
