@@ -114,8 +114,8 @@ export default function NotificationsPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+      <div className="max-w-2xl mx-auto px-2 sm:px-0 pb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
             <Bell className="w-8 h-8 text-primary" />
             Notifications

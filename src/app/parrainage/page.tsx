@@ -75,8 +75,8 @@ export default function ParrainagePage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Parrainage</h2>
+      <div className="max-w-2xl mx-auto px-2 sm:px-0 pb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Parrainage</h2>
 
         {/* Solde */}
         <div className="bg-gradient-to-br from-accent to-orange-600 rounded-2xl p-6 text-white mb-6">

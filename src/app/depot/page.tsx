@@ -120,17 +120,23 @@ export default function DepotPage() {
     }
 
     try {
-      await dispatch(
-        createOrder({
-          type: 'DEPOT',
-          amount: parseFloat(formData.amount),
-          bookmakerId: formData.bookmakerId,
-          employeePaymentMethodId: formData.employeePaymentMethodId,
-          clientContact: formData.clientContact,
-          bookmakerIdentifier: formData.bookmakerIdentifier || undefined,
-          referenceId: formData.referenceId || undefined,
-        })
-      ).unwrap();
+      const orderData: any = {
+        type: 'DEPOT',
+        amount: parseFloat(formData.amount),
+        bookmakerId: formData.bookmakerId,
+        employeePaymentMethodId: formData.employeePaymentMethodId,
+        clientContact: formData.clientContact,
+      };
+
+      // Ajouter les champs optionnels seulement s'ils ont une valeur
+      if (formData.bookmakerIdentifier && formData.bookmakerIdentifier.trim()) {
+        orderData.bookmakerIdentifier = formData.bookmakerIdentifier.trim();
+      }
+      if (formData.referenceId && formData.referenceId.trim()) {
+        orderData.referenceId = formData.referenceId.trim();
+      }
+
+      await dispatch(createOrder(orderData)).unwrap();
 
       toast.success('Dépôt créé avec succès !');
       setStep(1);
@@ -147,7 +153,7 @@ export default function DepotPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-2 sm:px-0">
+      <div className="max-w-2xl mx-auto px-2 sm:px-0 pb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Nouveau Dépôt</h2>
 
         {/* Stepper */}

@@ -12,8 +12,8 @@ export default function InformationsPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Informations & Support</h2>
+      <div className="max-w-2xl mx-auto px-2 sm:px-0 pb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Informations & Support</h2>
 
         {/* Contact */}
         <div className="bg-white rounded-lg p-6 shadow-sm mb-6">

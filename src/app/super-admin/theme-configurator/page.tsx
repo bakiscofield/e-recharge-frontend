@@ -117,7 +117,7 @@ export default function ThemeConfigurator() {
 
   return (
     <SuperAdminLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
         {/* Header */}
         <motion.div
           className="mb-8 flex justify-between items-center"

@@ -1,19 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import api from '@/lib/api';
-
-interface User {
-  id: string;
-  email?: string;
-  phone: string;
-  firstName: string;
-  lastName: string;
-  country: string;
-  role: string;
-  isSuperAdmin: boolean;
-  isActive: boolean;
-  referralCode?: string;
-  referralBalance: number;
-}
+import { User } from '@/types/shared';
 
 interface AuthState {
   user: User | null;

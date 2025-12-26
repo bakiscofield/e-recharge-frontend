@@ -106,24 +106,51 @@ export default function RetraitPage() {
   };
 
   const handleSubmit = async () => {
+    // Validations
+    if (!formData.bookmakerId) {
+      toast.error('Veuillez sélectionner un bookmaker');
+      return;
+    }
+
+    if (!formData.employeePaymentMethodId) {
+      toast.error('Veuillez sélectionner un agent');
+      return;
+    }
+
     if (!formData.amount || parseFloat(formData.amount) < 1000) {
       toast.error('Montant minimum: 1000 FCFA');
       return;
     }
 
-    if (!formData.referenceId) {
+    if (!formData.clientContact || !formData.clientContact.trim()) {
+      toast.error('Votre contact est requis');
+      return;
+    }
+
+    if (!formData.referenceId || !formData.referenceId.trim()) {
       toast.error('Code retrait requis');
       return;
     }
 
     try {
-      await dispatch(
-        createOrder({
-          type: 'RETRAIT',
-          ...formData,
-          amount: parseFloat(formData.amount),
-        })
-      ).unwrap();
+      const orderData: any = {
+        type: 'RETRAIT',
+        amount: parseFloat(formData.amount),
+        bookmakerId: formData.bookmakerId,
+        employeePaymentMethodId: formData.employeePaymentMethodId,
+        clientContact: formData.clientContact,
+      };
+
+      // Ajouter les champs optionnels seulement s'ils ont une valeur
+      if (formData.bookmakerIdentifier && formData.bookmakerIdentifier.trim()) {
+        orderData.bookmakerIdentifier = formData.bookmakerIdentifier.trim();
+      }
+      if (formData.referenceId && formData.referenceId.trim()) {
+        orderData.referenceId = formData.referenceId.trim();
+      }
+
+      console.log('Données envoyées:', orderData);
+      await dispatch(createOrder(orderData)).unwrap();
 
       toast.success('Retrait créé avec succès !');
       setStep(1);
@@ -133,13 +160,14 @@ export default function RetraitPage() {
         referenceId: '',
       });
     } catch (error: any) {
-      toast.error(error.message || 'Erreur de création');
+      console.error('Erreur lors de la création du retrait:', error);
+      toast.error(error || 'Erreur de création du retrait');
     }
   };
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-2 sm:px-0">
+      <div className="max-w-2xl mx-auto px-2 sm:px-0 pb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Nouveau Retrait</h2>
 
         {/* Stepper */}

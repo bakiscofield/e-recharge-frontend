@@ -78,7 +78,22 @@ export default function ChatPage() {
 
     newSocket.on('new_message', (message: Message) => {
       console.log('New message received:', message);
-      setMessages((prev) => [...prev, message]);
+      setMessages((prev) => {
+        // Si c'est notre propre message, remplacer le message optimiste temporaire
+        if (message.senderId === user.id) {
+          // Trouver et remplacer le message temporaire le plus récent
+          const tempMessageIndex = prev.findIndex(
+            (m) => m.senderId === user.id && m.id.startsWith('temp-')
+          );
+          if (tempMessageIndex !== -1) {
+            const updated = [...prev];
+            updated[tempMessageIndex] = message;
+            return updated;
+          }
+        }
+        // Sinon, ajouter le nouveau message normalement
+        return [...prev, message];
+      });
       // Marquer comme lu si le message n'est pas de moi
       if (message.senderId !== user.id && conversation) {
         newSocket.emit('mark_read', { conversationId: conversation.id, userId: user.id });
@@ -152,14 +167,36 @@ export default function ChatPage() {
     if (!newMessage.trim() || !conversation || !user) return;
 
     setSending(true);
+    const messageContent = newMessage.trim();
+
     try {
       if (socket) {
+        // Créer un message optimiste pour affichage immédiat
+        const optimisticMessage: Message = {
+          id: `temp-${Date.now()}`, // ID temporaire
+          content: messageContent,
+          senderId: user.id,
+          createdAt: new Date().toISOString(),
+          isRead: false,
+          sender: {
+            id: user.id,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            avatar: user.avatar,
+            role: user.role,
+          },
+        };
+
+        // Ajouter le message immédiatement à l'affichage
+        setMessages((prev) => [...prev, optimisticMessage]);
+        setNewMessage('');
+
+        // Envoyer au serveur
         socket.emit('send_message', {
           conversationId: conversation.id,
           senderId: user.id,
-          content: newMessage,
+          content: messageContent,
         });
-        setNewMessage('');
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -196,7 +233,7 @@ export default function ChatPage() {
               <p className="text-sm sm:text-base text-white/90">
                 {conversation?.agent
                   ? `Agent: ${conversation.agent.firstName} ${conversation.agent.lastName}`
-                  : 'En attente d\'un agent...'}
+                  : 'Notre équipe est disponible pour vous répondre'}
               </p>
             </div>
           </div>

@@ -79,7 +79,21 @@ export default function SuperAdminChatPage() {
 
     newSocket.on('new_message', (message: Message) => {
       if (selectedConversation && message) {
-        setMessages((prev) => [...prev, message]);
+        setMessages((prev) => {
+          // Si c'est notre propre message, remplacer le message optimiste temporaire
+          if (message.senderId === user.id) {
+            const tempMessageIndex = prev.findIndex(
+              (m) => m.senderId === user.id && m.id.startsWith('temp-')
+            );
+            if (tempMessageIndex !== -1) {
+              const updated = [...prev];
+              updated[tempMessageIndex] = message;
+              return updated;
+            }
+          }
+          // Sinon, ajouter le nouveau message normalement
+          return [...prev, message];
+        });
       }
       // Rafraîchir la liste des conversations
       loadConversations();
@@ -143,14 +157,35 @@ export default function SuperAdminChatPage() {
     if (!newMessage.trim() || !selectedConversation || !user) return;
 
     setSending(true);
+    const messageContent = newMessage.trim();
+
     try {
       if (socket) {
+        // Créer un message optimiste pour affichage immédiat
+        const optimisticMessage: Message = {
+          id: `temp-${Date.now()}`,
+          content: messageContent,
+          senderId: user.id,
+          createdAt: new Date().toISOString(),
+          isRead: false,
+          sender: {
+            id: user.id,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            avatar: user.avatar,
+          },
+        };
+
+        // Ajouter le message immédiatement à l'affichage
+        setMessages((prev) => [...prev, optimisticMessage]);
+        setNewMessage('');
+
+        // Envoyer au serveur
         socket.emit('send_message', {
           conversationId: selectedConversation.id,
           senderId: user.id,
-          content: newMessage,
+          content: messageContent,
         });
-        setNewMessage('');
       }
     } catch (error) {
       console.error('Error sending message:', error);
