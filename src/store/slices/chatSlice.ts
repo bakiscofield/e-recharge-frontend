@@ -5,6 +5,7 @@ interface ChatState {
   currentConversation: any;
   messages: any[];
   isConnected: boolean;
+  unreadCount: number;
 }
 
 const initialState: ChatState = {
@@ -12,6 +13,7 @@ const initialState: ChatState = {
   currentConversation: null,
   messages: [],
   isConnected: false,
+  unreadCount: 0,
 };
 
 const chatSlice = createSlice({
@@ -33,8 +35,26 @@ const chatSlice = createSlice({
     addMessage: (state, action: PayloadAction<any>) => {
       state.messages.push(action.payload);
     },
+    setUnreadCount: (state, action: PayloadAction<number>) => {
+      state.unreadCount = action.payload;
+    },
+    incrementUnreadCount: (state) => {
+      state.unreadCount += 1;
+    },
+    resetUnreadCount: (state) => {
+      state.unreadCount = 0;
+    },
   },
 });
 
-export const { setConnected, setConversations, setCurrentConversation, setMessages, addMessage } = chatSlice.actions;
+export const {
+  setConnected,
+  setConversations,
+  setCurrentConversation,
+  setMessages,
+  addMessage,
+  setUnreadCount,
+  incrementUnreadCount,
+  resetUnreadCount
+} = chatSlice.actions;
 export default chatSlice.reducer;

@@ -21,6 +21,7 @@ export function AdminHeader() {
   const pathname = usePathname();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
+  const { unreadCount } = useSelector((state: RootState) => state.chat);
   const { appName, appLogo } = useAppConfig();
 
   const navigation = [
@@ -67,12 +68,13 @@ export function AdminHeader() {
               .map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
+                const showBadge = item.href === '/admin/chat' && unreadCount > 0;
                 return (
                   <button
                     key={item.name}
                     onClick={() => router.push(item.href)}
                     className={`
-                      px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2
+                      px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 relative
                       ${active
                         ? 'bg-primary text-white shadow-md'
                         : 'text-gray-700 hover:bg-gray-100'
@@ -81,6 +83,11 @@ export function AdminHeader() {
                   >
                     <Icon className="h-4 w-4" />
                     {item.name}
+                    {showBadge && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -124,11 +131,12 @@ export function AdminHeader() {
               .map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
+                const showBadge = item.href === '/admin/chat' && unreadCount > 0;
                 return (
                   <button
                     key={item.name}
                     onClick={() => router.push(item.href)}
-                    className={`p-2.5 rounded-lg transition ${
+                    className={`p-2.5 rounded-lg transition relative ${
                       active
                         ? 'text-primary bg-primary/10'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -136,6 +144,11 @@ export function AdminHeader() {
                     title={item.name}
                   >
                     <Icon className="h-5 w-5" />
+                    {showBadge && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
                   </button>
                 );
               })}

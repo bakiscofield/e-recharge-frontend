@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import { useSelector, useDispatch } from 'react-redux';
+import { useRouter } from 'next/navigation';
+import { RootState, AppDispatch } from '@/store';
+import { resetUnreadCount } from '@/store/slices/chatSlice';
 import AppLayout from '@/components/Layout/AppLayout';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -14,7 +16,8 @@ import {
   Paperclip,
   Check,
   CheckCheck,
-  Loader2
+  Loader2,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import io, { Socket } from 'socket.io-client';
@@ -55,6 +58,8 @@ interface Conversation {
 }
 
 export default function ChatPage() {
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -143,7 +148,9 @@ export default function ChatPage() {
 
   useEffect(() => {
     loadConversation();
-  }, []);
+    // Réinitialiser le compteur de messages non lus quand on ouvre le chat
+    dispatch(resetUnreadCount());
+  }, [dispatch]);
 
   // Charger les messages d'une conversation
   const loadMessages = async (conversationId: string) => {
@@ -226,16 +233,25 @@ export default function ChatPage() {
       <div className="max-w-4xl mx-auto h-[calc(100vh-160px)] flex flex-col bg-white rounded-lg shadow-sm overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-primary to-primary/80 text-white p-4 sm:p-6">
-          <div className="flex items-center gap-3">
-            <MessageCircle className="h-8 w-8 sm:h-10 sm:w-10" />
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold">Support Client</h2>
-              <p className="text-sm sm:text-base text-white/90">
-                {conversation?.agent
-                  ? `Agent: ${conversation.agent.firstName} ${conversation.agent.lastName}`
-                  : 'Notre équipe est disponible pour vous répondre'}
-              </p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <MessageCircle className="h-8 w-8 sm:h-10 sm:w-10" />
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold">Support Client</h2>
+                <p className="text-sm sm:text-base text-white/90">
+                  {conversation?.agent
+                    ? `Agent: ${conversation.agent.firstName} ${conversation.agent.lastName}`
+                    : 'Notre équipe est disponible pour vous répondre'}
+                </p>
+              </div>
             </div>
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              title="Fermer"
+            >
+              <X className="h-6 w-6 sm:h-7 sm:w-7" />
+            </button>
           </div>
         </div>
 
