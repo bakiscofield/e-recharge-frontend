@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Template Screenshot Desktop - 1280x720</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 1280px;
+      height: 720px;
+      margin: 20px;
+      border: 3px solid #3B82F6;
+      position: relative;
+      background: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(59, 130, 246, 0.1);
+      pointer-events: none;
+    }
+
+    .dimensions {
+      background: #3B82F6;
+      color: white;
+      padding: 16px 32px;
+      border-radius: 8px;
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 24px;
+    }
+
+    .guide {
+      background: white;
+      padding: 32px;
+      border-radius: 16px;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    .guide h2 {
+      color: #3B82F6;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+
+    .guide p {
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 16px;
+      font-size: 16px;
+    }
+
+    .guide ol {
+      text-align: left;
+      color: #444;
+      padding-left: 24px;
+      font-size: 15px;
+    }
+
+    .guide li {
+      margin: 10px 0;
+    }
+
+    .hide-button {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      background: #3B82F6;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      z-index: 1000;
+    }
+
+    .hide-button:hover {
+      background: #2563EB;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .iframe-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <button class="hide-button" onclick="toggleOverlay()">Masquer le guide</button>
+
+  <div class="overlay" id="overlay">
+    <div class="dimensions">1280 × 720</div>
+    <div class="guide">
+      <h2>🖥️ Screenshot Desktop PWA</h2>
+      <p><strong>Dimensions exactes : 1280x720 pixels</strong></p>
+      <p>Pour capturer votre app :</p>
+      <ol>
+        <li>Ouvrez votre app dans un nouvel onglet</li>
+        <li>Redimensionnez la fenêtre à 1280×720</li>
+        <li>Ou utilisez l'extension "Window Resizer"</li>
+        <li>Prendre une capture d'écran</li>
+        <li>Sauvegarder comme desktop-1.png</li>
+      </ol>
+      <p style="margin-top: 20px; font-size: 14px; color: #888;">
+        Ou cliquez sur "Masquer le guide" et chargez votre app ci-dessous,<br>
+        puis capturez cette page entière
+      </p>
+    </div>
+  </div>
+
+  <div class="iframe-container hidden" id="iframe-container">
+    <iframe src="https://front-alice.alicebot.online" title="AliceBot App"></iframe>
+  </div>
+
+  <script>
+    function toggleOverlay() {
+      const overlay = document.getElementById('overlay');
+      const iframeContainer = document.getElementById('iframe-container');
+      const button = document.querySelector('.hide-button');
+
+      overlay.classList.toggle('hidden');
+      iframeContainer.classList.toggle('hidden');
+
+      if (overlay.classList.contains('hidden')) {
+        button.textContent = 'Afficher le guide';
+      } else {
+        button.textContent = 'Masquer le guide';
+      }
+    }
+  </script>
+</body>
+</html>

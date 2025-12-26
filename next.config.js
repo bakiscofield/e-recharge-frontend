@@ -10,16 +10,31 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+
+  // Optimisations de production
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+
+  // Configuration des images optimisées
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'back-alice.alicebot.online'],
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
   },
 
-  // Configuration pour servir le Service Worker
+  // Optimisation de la compression
+  compress: true,
+
+  // Performance hints
+  poweredByHeader: false,
+
+  // Optimisation des en-têtes HTTP
   async headers() {
     return [
+      // Service Worker
       {
         source: '/sw.js',
         headers: [
@@ -37,6 +52,7 @@ const nextConfig = {
           },
         ],
       },
+      // Manifest PWA
       {
         source: '/manifest.json',
         headers: [
@@ -47,6 +63,38 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=604800',
+          },
+        ],
+      },
+      // Assets statiques - Cache agressif
+      {
+        source: '/(icons|screenshots)/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Sécurité et performance
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin'
           },
         ],
       },

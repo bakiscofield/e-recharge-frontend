@@ -7,7 +7,14 @@
     "build": "next build && npm run postbuild",
     "postbuild": "node scripts/copy-pwa-files.js",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check-pwa": "node scripts/check-pwa.js",
+    "test-sw": "node scripts/test-service-worker.js",
+    "analyze-bundle": "node scripts/analyze-bundle.js",
+    "generate:icons": "node scripts/generate-missing-icons.js",
+    "generate:screenshots": "node scripts/capture-screenshots.js",
+    "generate:store-assets": "node scripts/generate-all-store-assets.js",
+    "update:assetlinks": "node scripts/update-assetlinks.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -37,6 +44,7 @@
     "@types/react-dom": "^18.2.18",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.1.0",
+    "sharp": "^0.34.5",
     "typescript": "^5.3.3"
   }
 }

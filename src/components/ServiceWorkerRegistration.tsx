@@ -18,6 +18,14 @@ export function ServiceWorkerRegistration() {
 
         console.log('[SW] Service Worker registered:', registration);
 
+        // Notification de succès (uniquement en dev)
+        if (process.env.NODE_ENV === 'development') {
+          toast.success('Service Worker activé', {
+            icon: '⚙️',
+            duration: 3000,
+          });
+        }
+
         // Vérifier les mises à jour
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
