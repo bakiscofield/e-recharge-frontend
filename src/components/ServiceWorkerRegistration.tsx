@@ -2,16 +2,15 @@
 
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { PWAUtils } from '@/lib/pwa-utils';
 
 export function ServiceWorkerRegistration() {
   useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      'serviceWorker' in navigator
-    ) {
+    if (PWAUtils.isServiceWorkerSupported()) {
       // Enregistrement manuel du Service Worker
       window.addEventListener('load', () => {
         registerServiceWorker();
+        logPWAStatus();
       });
     }
   }, []);
@@ -34,7 +33,10 @@ export function ServiceWorkerRegistration() {
               toast(
                 (t) => (
                   <div className="flex flex-col gap-2">
-                    <p className="font-medium">Mise à jour disponible !</p>
+                    <p className="font-medium">Mise à jour disponible</p>
+                    <p className="text-sm text-gray-600">
+                      Une nouvelle version d&apos;AliceBot est disponible
+                    </p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
@@ -42,13 +44,13 @@ export function ServiceWorkerRegistration() {
                           window.location.reload();
                           toast.dismiss(t.id);
                         }}
-                        className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium"
+                        className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition"
                       >
                         Mettre à jour
                       </button>
                       <button
                         onClick={() => toast.dismiss(t.id)}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium"
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
                       >
                         Plus tard
                       </button>
@@ -70,17 +72,45 @@ export function ServiceWorkerRegistration() {
         registration.update();
       }, 60 * 60 * 1000);
 
+      // Écouter les messages du SW
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data?.type === 'SW_ACTIVATED') {
+          console.log('[SW] Service Worker activated - Version:', event.data.version);
+        }
+      });
+
     } catch (error) {
       console.error('[SW] Service Worker registration failed:', error);
+    }
+  };
+
+  const logPWAStatus = async () => {
+    const appInfo = await PWAUtils.getAppInfo();
+    console.log('[PWA] App Info:', appInfo);
+
+    if (PWAUtils.isStandalone()) {
+      console.log('[PWA] Running in standalone mode');
+    }
+
+    if (PWAUtils.isIOS()) {
+      console.log('[PWA] Running on iOS');
+    }
+
+    if (PWAUtils.isAndroid()) {
+      console.log('[PWA] Running on Android');
     }
   };
 
   // Gestion de la connexion/déconnexion
   useEffect(() => {
     const handleOnline = () => {
-      toast.success('Connexion rétablie !', {
+      toast.success('Connexion rétablie', {
         icon: '🌐',
+        duration: 3000,
       });
+
+      // Déclencher la synchronisation des données
+      PWAUtils.requestBackgroundSync('sync-data').catch(console.error);
     };
 
     const handleOffline = () => {
@@ -90,6 +120,11 @@ export function ServiceWorkerRegistration() {
       });
     };
 
+    // Vérifier l'état initial
+    if (typeof window !== 'undefined' && !navigator.onLine) {
+      handleOffline();
+    }
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
@@ -97,6 +132,27 @@ export function ServiceWorkerRegistration() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
+  }, []);
+
+  // Gestion du changement de contrôleur (nouveau SW activé)
+  useEffect(() => {
+    let refreshing = false;
+
+    const handleControllerChange = () => {
+      if (!refreshing) {
+        refreshing = true;
+        console.log('[SW] New Service Worker activated, reloading...');
+        window.location.reload();
+      }
+    };
+
+    if (PWAUtils.isServiceWorkerSupported()) {
+      navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+
+      return () => {
+        navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+      };
+    }
   }, []);
 
   return null;

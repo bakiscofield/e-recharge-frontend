@@ -1,0 +1,6 @@
+# AliceBot Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://votre-domaine.com/sitemap.xml
