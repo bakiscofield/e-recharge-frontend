@@ -105,7 +105,7 @@ export default function DepotPage() {
       console.log('Agents loaded:', res.data);
       setAgents(res.data);
       if (res.data.length === 0) {
-        toast.error('Aucun agent en ligne disponible pour cette sélection');
+        toast.error('Aucun agent disponible pour cette sélection');
       }
     } catch (error: any) {
       console.error('Error loading agents:', error);
@@ -147,15 +147,15 @@ export default function DepotPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Nouveau Dépôt</h2>
+      <div className="max-w-2xl mx-auto px-2 sm:px-0">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Nouveau Dépôt</h2>
 
         {/* Stepper */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-4 sm:mb-8">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-base font-semibold ${
                   step >= s ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
                 }`}
               >
@@ -163,7 +163,7 @@ export default function DepotPage() {
               </div>
               {s < 3 && (
                 <div
-                  className={`h-1 w-16 mx-2 ${step > s ? 'bg-primary' : 'bg-gray-200'}`}
+                  className={`h-1 w-8 sm:w-16 mx-1 sm:mx-2 ${step > s ? 'bg-primary' : 'bg-gray-200'}`}
                 />
               )}
             </div>
@@ -172,16 +172,16 @@ export default function DepotPage() {
 
         {/* Step 1: Sélection */}
         {step === 1 && (
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                <Globe className="inline h-5 w-5 mr-2" />
+          <div className="space-y-3">
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Globe className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Pays
               </label>
               <select
                 value={formData.country}
                 onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
               >
                 <option value="TG">Togo</option>
                 <option value="BJ">Bénin</option>
@@ -189,31 +189,31 @@ export default function DepotPage() {
               </select>
             </div>
 
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                <Building2 className="inline h-5 w-5 mr-2" />
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Building2 className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Bookmaker
               </label>
               {bookmakers.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
-                  <Building2 className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                  <p className="font-medium">Aucun bookmaker disponible</p>
-                  <p className="text-sm mt-1">Veuillez contacter l'administration</p>
+                <div className="text-center py-6 sm:py-8 text-gray-500 bg-gray-50 rounded-lg">
+                  <Building2 className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 text-gray-400" />
+                  <p className="font-medium text-sm sm:text-base">Aucun bookmaker disponible</p>
+                  <p className="text-xs sm:text-sm mt-1">Veuillez contacter l'administration</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {bookmakers.map((bm) => (
                     <button
                       key={bm.id}
                       onClick={() => setFormData({ ...formData, bookmakerId: bm.id })}
-                      className={`p-4 border-2 rounded-lg transition ${
+                      className={`p-3 sm:p-4 border-2 rounded-lg transition ${
                         formData.bookmakerId === bm.id
                           ? 'border-primary bg-primary/5'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="font-semibold text-sm">{bm.name}</div>
+                      <div className="flex flex-col items-center gap-1 sm:gap-2">
+                        <div className="font-semibold text-xs sm:text-sm">{bm.name}</div>
                       </div>
                     </button>
                   ))}
@@ -221,20 +221,20 @@ export default function DepotPage() {
               )}
             </div>
 
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                <Wallet className="inline h-5 w-5 mr-2" />
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Wallet className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Moyen de paiement
               </label>
               {!formData.bookmakerId ? (
-                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
-                  <p className="text-sm">Veuillez d'abord sélectionner un bookmaker</p>
+                <div className="text-center py-6 sm:py-8 text-gray-500 bg-gray-50 rounded-lg">
+                  <p className="text-xs sm:text-sm">Veuillez d'abord sélectionner un bookmaker</p>
                 </div>
               ) : paymentMethods.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
-                  <Wallet className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                  <p className="font-medium">Aucun moyen de paiement disponible</p>
-                  <p className="text-sm mt-1">Veuillez contacter l'administration</p>
+                <div className="text-center py-6 sm:py-8 text-gray-500 bg-gray-50 rounded-lg">
+                  <Wallet className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 text-gray-400" />
+                  <p className="font-medium text-sm sm:text-base">Aucun moyen de paiement disponible</p>
+                  <p className="text-xs sm:text-sm mt-1">Veuillez contacter l'administration</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -242,14 +242,14 @@ export default function DepotPage() {
                     <button
                       key={pm.id}
                       onClick={() => setFormData({ ...formData, paymentMethodId: pm.id })}
-                      className={`w-full p-4 border-2 rounded-lg transition ${
+                      className={`w-full p-3 sm:p-4 border-2 rounded-lg transition ${
                         formData.paymentMethodId === pm.id
                           ? 'border-primary bg-primary/5'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="font-medium">{pm.name}</span>
+                        <span className="font-medium text-sm sm:text-base">{pm.name}</span>
                       </div>
                     </button>
                   ))}
@@ -260,25 +260,25 @@ export default function DepotPage() {
             <button
               onClick={() => setStep(2)}
               disabled={!formData.bookmakerId || !formData.paymentMethodId}
-              className="w-full bg-primary text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-primary text-white py-2.5 sm:py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
             >
               Continuer
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         )}
 
         {/* Step 2: Agent & Montant */}
         {step === 2 && (
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                <Users className="inline h-5 w-5 mr-2" />
-                Agent en ligne
+          <div className="space-y-3">
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Users className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                Agent disponible
               </label>
               {agents.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  Aucun agent en ligne pour le moment
+                <div className="text-center py-6 sm:py-8 text-gray-500">
+                  <p className="text-xs sm:text-sm">Aucun agent disponible pour le moment</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -289,7 +289,7 @@ export default function DepotPage() {
                         setFormData({ ...formData, employeePaymentMethodId: agent.id });
                         setSelectedAgent(agent);
                       }}
-                      className={`w-full p-4 border-2 rounded-lg text-left transition ${
+                      className={`w-full p-3 sm:p-4 border-2 rounded-lg text-left transition ${
                         formData.employeePaymentMethodId === agent.id
                           ? 'border-primary bg-primary/5'
                           : 'border-gray-200 hover:border-gray-300'
@@ -297,12 +297,14 @@ export default function DepotPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-semibold">
+                          <div className="font-semibold text-sm sm:text-base">
                             {agent.employee.firstName} {agent.employee.lastName}
                           </div>
-                          <div className="text-sm text-gray-600">Frais: {agent.frais} FCFA</div>
+                          <div className="text-xs sm:text-sm text-gray-600">Frais: {agent.frais} FCFA</div>
                         </div>
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        {agent.employee.isOnline && (
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        )}
                       </div>
                     </button>
                   ))}
@@ -310,9 +312,9 @@ export default function DepotPage() {
               )}
             </div>
 
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                <DollarSign className="inline h-5 w-5 mr-2" />
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <DollarSign className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Montant (FCFA)
               </label>
               <input
@@ -321,21 +323,21 @@ export default function DepotPage() {
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                 placeholder="5000"
                 min="500"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
               />
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 onClick={() => setStep(1)}
-                className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium"
+                className="flex-1 bg-gray-200 text-gray-700 py-2.5 sm:py-3 rounded-lg font-medium text-sm sm:text-base"
               >
                 Retour
               </button>
               <button
                 onClick={() => setStep(3)}
                 disabled={!formData.employeePaymentMethodId || !formData.amount}
-                className="flex-1 bg-primary text-white py-3 rounded-lg font-medium disabled:opacity-50"
+                className="flex-1 bg-primary text-white py-2.5 sm:py-3 rounded-lg font-medium disabled:opacity-50 text-sm sm:text-base"
               >
                 Continuer
               </button>
@@ -345,39 +347,39 @@ export default function DepotPage() {
 
         {/* Step 3: Informations */}
         {step === 3 && selectedAgent && (
-          <div className="space-y-4">
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">Instructions</h3>
-              <ol className="list-decimal list-inside space-y-2 text-sm text-gray-800">
+          <div className="space-y-3">
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 sm:p-4">
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Instructions</h3>
+              <ol className="list-decimal list-inside space-y-1 text-xs sm:text-sm text-gray-800">
                 <li>Composez le code USSD ci-dessous</li>
                 <li>Suivez les instructions de votre opérateur</li>
                 <li>Saisissez la référence SMS reçue</li>
               </ol>
             </div>
 
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <h4 className="font-semibold mb-2">Code USSD</h4>
-              <div className="bg-gray-100 p-4 rounded-lg font-mono text-lg text-center">
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+              <h4 className="font-semibold mb-2 text-sm sm:text-base">Code USSD</h4>
+              <div className="bg-gray-100 p-3 sm:p-4 rounded-lg font-mono text-base sm:text-lg text-center break-all">
                 {selectedAgent.syntaxe?.replace('{montant}', formData.amount)}
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                <Phone className="inline h-5 w-5 mr-2" />
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Phone className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Votre contact
               </label>
               <input
                 type="tel"
                 value={formData.clientContact}
                 onChange={(e) => setFormData({ ...formData, clientContact: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
               />
             </div>
 
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                <Building2 className="inline h-5 w-5 mr-2" />
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Building2 className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 ID {bookmakers.find(bm => bm.id === formData.bookmakerId)?.name || 'Bookmaker'}
               </label>
 
@@ -387,9 +389,9 @@ export default function DepotPage() {
 
                 if (availableIds.length > 0) {
                   return (
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       {/* Toggle entre ID enregistré et nouveau */}
-                      <div className="flex gap-4">
+                      <div className="flex gap-3 sm:gap-4 flex-wrap">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="radio"
@@ -400,7 +402,7 @@ export default function DepotPage() {
                             }}
                             className="w-4 h-4 text-primary focus:ring-primary"
                           />
-                          <span className="text-sm">ID enregistré</span>
+                          <span className="text-xs sm:text-sm">ID enregistré</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -412,7 +414,7 @@ export default function DepotPage() {
                             }}
                             className="w-4 h-4 text-primary focus:ring-primary"
                           />
-                          <span className="text-sm">Saisir un nouvel ID</span>
+                          <span className="text-xs sm:text-sm">Saisir un nouvel ID</span>
                         </label>
                       </div>
 
@@ -421,7 +423,7 @@ export default function DepotPage() {
                         <select
                           value={formData.bookmakerIdentifier}
                           onChange={(e) => setFormData({ ...formData, bookmakerIdentifier: e.target.value })}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
                         >
                           <option value="">Sélectionner un ID...</option>
                           {availableIds.map((savedId) => (
@@ -436,7 +438,7 @@ export default function DepotPage() {
                           value={formData.bookmakerIdentifier}
                           onChange={(e) => setFormData({ ...formData, bookmakerIdentifier: e.target.value })}
                           placeholder={`Ex: ID ${bookmakers.find(bm => bm.id === formData.bookmakerId)?.name || 'bookmaker'}`}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
                         />
                       )}
                     </div>
@@ -449,7 +451,7 @@ export default function DepotPage() {
                       value={formData.bookmakerIdentifier}
                       onChange={(e) => setFormData({ ...formData, bookmakerIdentifier: e.target.value })}
                       placeholder={`Ex: ID ${bookmakers.find(bm => bm.id === formData.bookmakerId)?.name || 'bookmaker'}`}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
                     />
                   );
                 }
@@ -460,9 +462,9 @@ export default function DepotPage() {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                <CreditCard className="inline h-5 w-5 mr-2" />
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <CreditCard className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Référence SMS
               </label>
               <input
@@ -470,20 +472,20 @@ export default function DepotPage() {
                 value={formData.referenceId}
                 onChange={(e) => setFormData({ ...formData, referenceId: e.target.value })}
                 placeholder="Ex: 1234567890"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
               />
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 onClick={() => setStep(2)}
-                className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium"
+                className="flex-1 bg-gray-200 text-gray-700 py-2.5 sm:py-3 rounded-lg font-medium text-sm sm:text-base"
               >
                 Retour
               </button>
               <button
                 onClick={handleSubmit}
-                className="flex-1 bg-primary text-white py-3 rounded-lg font-medium"
+                className="flex-1 bg-primary text-white py-2.5 sm:py-3 rounded-lg font-medium text-sm sm:text-base"
               >
                 Confirmer le dépôt
               </button>
