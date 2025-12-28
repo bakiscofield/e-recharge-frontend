@@ -17,7 +17,8 @@ import {
   Bell,
   Crown,
   UserCog,
-  MessageSquare
+  MessageSquare,
+  Megaphone
 } from 'lucide-react';
 import { useAppConfig } from '@/hooks/useAppConfig';
 
@@ -35,6 +36,7 @@ export function SuperAdminHeader() {
     { name: 'Assignations', href: '/super-admin/agent-assignments', icon: LinkIcon },
     { name: 'Configuration', href: '/super-admin/configuration', icon: Settings },
     { name: 'Thème', href: '/super-admin/theme-configurator', icon: Palette },
+    { name: 'Annonces', href: '/super-admin/annonces', icon: Megaphone },
     { name: 'Chat', href: '/admin/chat', icon: MessageSquare },
   ];
 

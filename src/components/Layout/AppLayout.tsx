@@ -6,6 +6,7 @@ import { RootState, AppDispatch } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import { useAppConfig } from '@/hooks/useAppConfig';
 import FallingSymbols from '@/components/Animations/FallingSymbols';
+import { AnnouncementModal } from '@/components/AnnouncementModal';
 import {
   Home,
   ArrowDownCircle,
@@ -59,6 +60,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen bg-gray-50 pb-20 relative">
       {/* Animation d'arrière-plan */}
       <FallingSymbols />
+
+      {/* Annonce Modal */}
+      <AnnouncementModal />
 
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 safe-top">
