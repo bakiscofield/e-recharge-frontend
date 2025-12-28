@@ -157,17 +157,20 @@ export default function ChatPage() {
     try {
       const response = await api.get(`/chat/conversations/${conversationId}/messages`);
       setMessages(response.data);
-
-      // Rejoindre la room WebSocket
-      if (socket) {
-        socket.emit('join_conversation', { conversationId });
-        socket.emit('mark_read', { conversationId, userId: user?.id });
-      }
     } catch (error) {
       console.error('Error loading messages:', error);
       toast.error('Erreur lors du chargement des messages');
     }
   };
+
+  // Rejoindre la room WebSocket quand le socket et la conversation sont prêts
+  useEffect(() => {
+    if (socket && conversation?.id) {
+      console.log('Joining conversation room:', conversation.id);
+      socket.emit('join_conversation', { conversationId: conversation.id });
+      socket.emit('mark_read', { conversationId: conversation.id, userId: user?.id });
+    }
+  }, [socket, conversation?.id, user?.id]);
 
   // Envoyer un message
   const sendMessage = async () => {
