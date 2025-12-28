@@ -44,6 +44,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Capacitor (généré depuis .example)
+capacitor.config.ts
+
 # PWA files auto-générés (next-pwa)
 # Notre sw.js personnalisé est versionné, donc ne pas l'ignorer
 # **/public/sw.js

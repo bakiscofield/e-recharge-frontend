@@ -22,6 +22,12 @@ fi
 echo -e "${BLUE}📦 Installation des packages Capacitor...${NC}"
 npm install @capacitor/core @capacitor/cli @capacitor/android
 
+echo -e "${BLUE}📝 Création du fichier de configuration...${NC}"
+if [ -f "capacitor.config.ts.example" ] && [ ! -f "capacitor.config.ts" ]; then
+    cp capacitor.config.ts.example capacitor.config.ts
+    echo "✓ capacitor.config.ts créé depuis l'exemple"
+fi
+
 echo -e "${BLUE}🔧 Ajout de la plateforme Android...${NC}"
 npx cap add android
 

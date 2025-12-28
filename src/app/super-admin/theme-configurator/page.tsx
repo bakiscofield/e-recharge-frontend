@@ -313,7 +313,7 @@ export default function ThemeConfigurator() {
                 <Select
                   label="Type d'arrière-plan"
                   value={theme.clientBackgroundType || 'animation'}
-                  onChange={(v: string) => setTheme({ ...theme, clientBackgroundType: v })}
+                  onChange={(v: string) => setTheme({ ...theme, clientBackgroundType: v as 'animation' | 'image' })}
                   options={[
                     { value: 'animation', label: 'Animation' },
                     { value: 'image', label: 'Image fixe' },
