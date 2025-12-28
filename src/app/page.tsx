@@ -47,13 +47,9 @@ export default function Home() {
       // Par défaut (CLIENT, etc.)
       console.log('[Home] Redirecting to /depot (default)');
       router.push('/depot');
-    } else {
-      // Si pas d'infos utilisateur mais token présent, attendre un peu
-      const timer = setTimeout(() => {
-        router.push('/depot');
-      }, 500);
-      return () => clearTimeout(timer);
     }
+    // Si pas d'infos utilisateur mais token présent, ne rien faire
+    // Le user sera chargé depuis localStorage et le useEffect se ré-exécutera
   }, [token, user, router]);
 
   return (

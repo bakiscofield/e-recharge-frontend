@@ -22,8 +22,8 @@ export function useRoleRedirect() {
       if (pathname === '/' || pathname === '/admin') {
         router.push('/super-admin');
       }
-    } else if (user.role === 'ADMIN') {
-      // Admin - rediriger vers /admin si sur la page d'accueil
+    } else if (user.role === 'ADMIN' || user.role === 'AGENT') {
+      // Admin/Agent - rediriger vers /admin si sur la page d'accueil
       // Et bloquer l'accès à /super-admin
       if (pathname === '/') {
         router.push('/admin');
@@ -33,7 +33,7 @@ export function useRoleRedirect() {
     } else {
       // Client - bloquer l'accès aux pages admin
       if (pathname.startsWith('/admin') || pathname.startsWith('/super-admin')) {
-        router.push('/');
+        router.push('/depot');
       }
     }
   }, [user, pathname, router]);
