@@ -33,6 +33,8 @@ export default function ThemeConfigurator() {
 
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [saving, setSaving] = useState(false);
+  const [uploadingBg, setUploadingBg] = useState(false);
+  const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetchTheme();
@@ -47,11 +49,41 @@ export default function ThemeConfigurator() {
     }
   };
 
+  const handleBackgroundImageUpload = async (file: File) => {
+    setUploadingBg(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post('/upload/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setTheme({ ...theme, clientBackgroundImage: response.data.url });
+      setBackgroundImageFile(file);
+      alert('Image uploadée avec succès!');
+    } catch (error) {
+      console.error('Erreur lors de l\'upload:', error);
+      alert('Erreur lors de l\'upload de l\'image');
+    } finally {
+      setUploadingBg(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       await api.put('/theme/update', theme);
-      alert('Thème sauvegardé avec succès!');
+
+      // Déclencher un événement pour rafraîchir le thème immédiatement
+      window.dispatchEvent(new CustomEvent('theme-updated'));
+
+      // Stocker un timestamp pour forcer le rafraîchissement
+      localStorage.setItem('theme-last-update', Date.now().toString());
+
+      alert('Thème sauvegardé avec succès! Les changements seront appliqués automatiquement.');
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       alert('Erreur lors de la sauvegarde du thème');
@@ -104,10 +136,16 @@ export default function ThemeConfigurator() {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="px-3 py-1 bg-[#0a0a1f] text-gray-900 rounded border border-gray-600 cursor-pointer"
+        className="px-3 py-2 bg-white text-gray-900 rounded border border-gray-300 cursor-pointer focus:ring-2 focus:ring-primary focus:border-primary"
+        style={{ backgroundColor: 'white', color: '#111827' }}
       >
         {options.map((opt: any) => (
-          <option key={opt.value} value={opt.value}>
+          <option
+            key={opt.value}
+            value={opt.value}
+            className="bg-white text-gray-900 py-2"
+            style={{ backgroundColor: 'white', color: '#111827' }}
+          >
             {opt.label}
           </option>
         ))}
@@ -265,6 +303,67 @@ export default function ThemeConfigurator() {
                     { value: 'waves', label: 'Vagues' },
                   ]}
                 />
+              </div>
+            </div>
+
+            {/* Client Pages Background */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="p-6 space-y-4">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">🖼️ Arrière-plan Pages Client</h3>
+                <Select
+                  label="Type d'arrière-plan"
+                  value={theme.clientBackgroundType || 'animation'}
+                  onChange={(v: string) => setTheme({ ...theme, clientBackgroundType: v })}
+                  options={[
+                    { value: 'animation', label: 'Animation' },
+                    { value: 'image', label: 'Image fixe' },
+                  ]}
+                />
+
+                {theme.clientBackgroundType === 'image' && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                      <span className="text-sm text-gray-600">Image de fond</span>
+                      <label className="cursor-pointer">
+                        <span className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90 transition">
+                          {uploadingBg ? 'Upload...' : 'Choisir'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleBackgroundImageUpload(file);
+                          }}
+                          disabled={uploadingBg}
+                        />
+                      </label>
+                    </div>
+
+                    {theme.clientBackgroundImage && (
+                      <div className="relative rounded-lg overflow-hidden border-2 border-gray-200">
+                        <img
+                          src={theme.clientBackgroundImage}
+                          alt="Arrière-plan"
+                          className="w-full h-32 object-cover"
+                        />
+                        <button
+                          onClick={() => setTheme({ ...theme, clientBackgroundImage: undefined })}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+
+                    <p className="text-xs text-gray-500">
+                      L&apos;image sera utilisée comme fond pour toutes les pages clients
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

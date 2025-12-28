@@ -7,6 +7,8 @@ import { logout } from '@/store/slices/authSlice';
 import { useAppConfig } from '@/hooks/useAppConfig';
 import FallingSymbols from '@/components/Animations/FallingSymbols';
 import { AnnouncementModal } from '@/components/AnnouncementModal';
+import api from '@/lib/api';
+import type { ThemeConfig } from '@/types/shared';
 import {
   Home,
   ArrowDownCircle,
@@ -19,7 +21,7 @@ import {
   Bell,
   LogOut,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -33,12 +35,104 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { unreadCount } = useSelector((state: RootState) => state.notifications);
   const { unreadCount: chatUnreadCount } = useSelector((state: RootState) => state.chat);
   const { appName, appLogo } = useAppConfig();
+  const [themeConfig, setThemeConfig] = useState<ThemeConfig | null>(null);
 
   useEffect(() => {
     if (!token) {
       router.push('/login');
     }
   }, [token, router]);
+
+  const applyTheme = (theme: any) => {
+    if (!theme) return;
+
+    const root = document.documentElement;
+
+    // Couleurs
+    if (theme.primaryColor) root.style.setProperty('--theme-primary', theme.primaryColor);
+    if (theme.secondaryColor) root.style.setProperty('--theme-secondary', theme.secondaryColor);
+    if (theme.accentColor) root.style.setProperty('--theme-accent', theme.accentColor);
+    if (theme.backgroundColor) root.style.setProperty('--theme-background', theme.backgroundColor);
+    if (theme.surfaceColor) root.style.setProperty('--theme-surface', theme.surfaceColor);
+    if (theme.textColor) root.style.setProperty('--theme-text', theme.textColor);
+
+    // Effets
+    if (theme.glowIntensity) root.style.setProperty('--theme-glow-intensity', theme.glowIntensity.toString());
+    if (theme.animationSpeed) root.style.setProperty('--theme-animation-speed', theme.animationSpeed.toString());
+    if (theme.moneyColor) root.style.setProperty('--theme-money-color', theme.moneyColor);
+
+    console.log('🎨 Thème appliqué:', theme);
+  };
+
+  const fetchTheme = async () => {
+    try {
+      const response = await api.get('/theme/active');
+      const theme = response.data;
+
+      // Vérifier si le thème a changé
+      const themeChanged = JSON.stringify(theme) !== JSON.stringify(themeConfig);
+
+      if (themeChanged) {
+        console.log('🔄 Nouveau thème détecté, application...');
+        setThemeConfig(theme);
+        applyTheme(theme);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du thème:', error);
+    }
+  };
+
+  // Charger le thème initial
+  useEffect(() => {
+    if (token) {
+      fetchTheme();
+    }
+  }, [token]);
+
+  // Rafraîchir le thème automatiquement toutes les 5 secondes
+  useEffect(() => {
+    if (!token) return;
+
+    const interval = setInterval(() => {
+      fetchTheme();
+    }, 5000); // Vérifier les changements toutes les 5 secondes
+
+    return () => clearInterval(interval);
+  }, [token, themeConfig]);
+
+  // Rafraîchir le thème quand la fenêtre redevient visible
+  useEffect(() => {
+    if (!token) return;
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('👁️ Fenêtre visible, vérification du thème...');
+        fetchTheme();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [token]);
+
+  // Écouter les événements de mise à jour du thème
+  useEffect(() => {
+    if (!token) return;
+
+    const handleThemeUpdate = () => {
+      console.log('⚡ Événement theme-updated reçu, rafraîchissement immédiat...');
+      fetchTheme();
+    };
+
+    window.addEventListener('theme-updated', handleThemeUpdate);
+
+    return () => {
+      window.removeEventListener('theme-updated', handleThemeUpdate);
+    };
+  }, [token]);
 
   const navItems = [
     { icon: ArrowDownCircle, label: 'Dépôt', path: '/depot' },
@@ -58,8 +152,22 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 relative">
-      {/* Animation d'arrière-plan */}
-      <FallingSymbols />
+      {/* Arrière-plan dynamique */}
+      {themeConfig?.clientBackgroundType === 'image' && themeConfig?.clientBackgroundImage ? (
+        <div
+          className="fixed inset-0 z-0"
+          style={{
+            backgroundImage: `url(${themeConfig.clientBackgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            // Sur mobile, on utilise scroll au lieu de fixed pour de meilleures performances
+            backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll',
+          }}
+        />
+      ) : themeConfig?.particlesEnabled !== false ? (
+        <FallingSymbols themeConfig={themeConfig} />
+      ) : null}
 
       {/* Annonce Modal */}
       <AnnouncementModal />

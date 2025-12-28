@@ -8,6 +8,7 @@ import { createOrder } from '@/store/slices/ordersSlice';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { Globe, Wallet, Building2, Users, DollarSign, Phone, CreditCard, ArrowRight } from 'lucide-react';
+import { WaitingModal } from '@/components/Modal/WaitingModal';
 
 export default function DepotPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,6 +20,7 @@ export default function DepotPage() {
   const [agents, setAgents] = useState<any[]>([]);
   const [savedIds, setSavedIds] = useState<any[]>([]);
   const [useNewId, setUseNewId] = useState(false);
+  const [showWaitingModal, setShowWaitingModal] = useState(false);
 
   const [formData, setFormData] = useState({
     country: user?.country || 'TG',
@@ -138,7 +140,8 @@ export default function DepotPage() {
 
       await dispatch(createOrder(orderData)).unwrap();
 
-      toast.success('Dépôt créé avec succès !');
+      // Show waiting modal instead of toast
+      setShowWaitingModal(true);
       setStep(1);
       setFormData({
         ...formData,
@@ -499,6 +502,13 @@ export default function DepotPage() {
           </div>
         )}
       </div>
+
+      {/* Waiting Modal */}
+      <WaitingModal
+        isOpen={showWaitingModal}
+        onClose={() => setShowWaitingModal(false)}
+        type="DEPOT"
+      />
     </AppLayout>
   );
 }

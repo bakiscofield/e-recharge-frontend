@@ -5,18 +5,24 @@ import AppLayout from '@/components/Layout/AppLayout';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { fetchOrders } from '@/store/slices/ordersSlice';
-import { ArrowDownCircle, ArrowUpCircle, Filter, Search } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Filter, Search, Download, FileText, Image as ImageIconLucide, X, Eye } from 'lucide-react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/fr';
+import { TransactionReceipt } from '@/components/Receipt/TransactionReceipt';
+import { downloadReceiptAsPDF, downloadReceiptAsPNG, previewReceipt } from '@/lib/downloadReceipt';
+import toast from 'react-hot-toast';
 
 dayjs.locale('fr');
 
 export default function HistoriquePage() {
   const dispatch = useDispatch<AppDispatch>();
   const { orders, isLoading } = useSelector((state: RootState) => state.orders);
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const [filter, setFilter] = useState<'ALL' | 'DEPOT' | 'RETRAIT'>('ALL');
   const [search, setSearch] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchOrders());
@@ -45,17 +51,88 @@ export default function HistoriquePage() {
     );
   };
 
+  const handleDownloadPDF = async (order: any) => {
+    if (!user) {
+      toast.error('Utilisateur non connecté');
+      return;
+    }
+
+    setSelectedOrder({ ...order, user });
+    setDownloading(true);
+
+    // Wait for the receipt to render
+    setTimeout(async () => {
+      try {
+        await downloadReceiptAsPDF(order.id);
+        toast.success('Reçu PDF téléchargé avec succès');
+        setSelectedOrder(null);
+      } catch (error) {
+        console.error('Error downloading PDF:', error);
+        toast.error('Erreur lors du téléchargement du PDF');
+      } finally {
+        setDownloading(false);
+      }
+    }, 500);
+  };
+
+  const handleDownloadPNG = async (order: any) => {
+    if (!user) {
+      toast.error('Utilisateur non connecté');
+      return;
+    }
+
+    setSelectedOrder({ ...order, user });
+    setDownloading(true);
+
+    // Wait for the receipt to render
+    setTimeout(async () => {
+      try {
+        await downloadReceiptAsPNG(order.id);
+        toast.success('Reçu PNG téléchargé avec succès');
+        setSelectedOrder(null);
+      } catch (error) {
+        console.error('Error downloading PNG:', error);
+        toast.error('Erreur lors du téléchargement du PNG');
+      } finally {
+        setDownloading(false);
+      }
+    }, 500);
+  };
+
+  const handlePreview = async (order: any) => {
+    if (!user) {
+      toast.error('Utilisateur non connecté');
+      return;
+    }
+
+    setSelectedOrder({ ...order, user });
+    setDownloading(true);
+
+    // Wait for the receipt to render
+    setTimeout(async () => {
+      try {
+        await previewReceipt(order.id);
+        setSelectedOrder(null);
+      } catch (error) {
+        console.error('Error previewing receipt:', error);
+        toast.error('Erreur lors de la prévisualisation');
+      } finally {
+        setDownloading(false);
+      }
+    }, 500);
+  };
+
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-2 sm:px-0 pb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Historique</h2>
+      <div className="max-w-2xl mx-auto px-3 sm:px-4 lg:px-0 pb-4 sm:pb-6">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6">Historique</h2>
 
         {/* Filtres */}
-        <div className="mb-6 space-y-4">
+        <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
           <div className="flex gap-2 overflow-x-auto pb-2">
             <button
               onClick={() => setFilter('ALL')}
-              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium whitespace-nowrap transition text-sm sm:text-base ${
                 filter === 'ALL'
                   ? 'bg-primary text-white'
                   : 'bg-white text-gray-700 border border-gray-300'
@@ -65,7 +142,7 @@ export default function HistoriquePage() {
             </button>
             <button
               onClick={() => setFilter('DEPOT')}
-              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium whitespace-nowrap transition text-sm sm:text-base ${
                 filter === 'DEPOT'
                   ? 'bg-primary text-white'
                   : 'bg-white text-gray-700 border border-gray-300'
@@ -75,7 +152,7 @@ export default function HistoriquePage() {
             </button>
             <button
               onClick={() => setFilter('RETRAIT')}
-              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium whitespace-nowrap transition text-sm sm:text-base ${
                 filter === 'RETRAIT'
                   ? 'bg-secondary text-white'
                   : 'bg-white text-gray-700 border border-gray-300'
@@ -86,13 +163,13 @@ export default function HistoriquePage() {
           </div>
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un bookmaker..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+              className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
             />
           </div>
         </div>
@@ -107,23 +184,23 @@ export default function HistoriquePage() {
             <p className="text-gray-500">Aucune transaction trouvée</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {filteredOrders.map((order) => (
-              <div key={order.id} className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
+              <div key={order.id} className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm">
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     {order.type === 'DEPOT' ? (
-                      <div className="bg-primary/10 p-2 rounded-lg">
-                        <ArrowDownCircle className="h-6 w-6 text-primary" />
+                      <div className="bg-primary/10 p-1.5 sm:p-2 rounded-lg">
+                        <ArrowDownCircle className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                       </div>
                     ) : (
-                      <div className="bg-secondary/10 p-2 rounded-lg">
-                        <ArrowUpCircle className="h-6 w-6 text-secondary" />
+                      <div className="bg-secondary/10 p-1.5 sm:p-2 rounded-lg">
+                        <ArrowUpCircle className="h-5 w-5 sm:h-6 sm:w-6 text-secondary" />
                       </div>
                     )}
                     <div>
-                      <h3 className="font-semibold text-gray-900">{order.bookmaker.name}</h3>
-                      <p className="text-sm text-gray-600">
+                      <h3 className="font-semibold text-sm sm:text-base text-gray-900">{order.bookmaker.name}</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">
                         {dayjs(order.createdAt).format('DD MMM YYYY, HH:mm')}
                       </p>
                     </div>
@@ -131,15 +208,15 @@ export default function HistoriquePage() {
                   {getStateBadge(order.state)}
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-100">
                   <div>
-                    <p className="text-sm text-gray-600">Montant</p>
-                    <p className="font-bold text-lg text-gray-900">{order.amount} FCFA</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Montant</p>
+                    <p className="font-bold text-base sm:text-lg text-gray-900">{order.amount} FCFA</p>
                   </div>
                   {order.fees > 0 && (
                     <div className="text-right">
-                      <p className="text-sm text-gray-600">Frais</p>
-                      <p className="font-semibold text-gray-900">{order.fees} FCFA</p>
+                      <p className="text-xs sm:text-sm text-gray-600">Frais</p>
+                      <p className="font-semibold text-sm sm:text-base text-gray-900">{order.fees} FCFA</p>
                     </div>
                   )}
                 </div>
@@ -151,8 +228,46 @@ export default function HistoriquePage() {
                     </p>
                   </div>
                 )}
+
+                {/* Download buttons */}
+                <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 flex gap-1.5 sm:gap-2">
+                  <button
+                    onClick={() => handlePreview(order)}
+                    disabled={downloading}
+                    className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition font-medium text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                  >
+                    <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Aperçu</span>
+                    <span className="sm:hidden">👁️</span>
+                  </button>
+                  <button
+                    onClick={() => handleDownloadPDF(order)}
+                    disabled={downloading}
+                    className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition font-medium text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                  >
+                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">PDF</span>
+                    <span className="sm:hidden">PDF</span>
+                  </button>
+                  <button
+                    onClick={() => handleDownloadPNG(order)}
+                    disabled={downloading}
+                    className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-secondary/10 hover:bg-secondary/20 text-secondary rounded-lg transition font-medium text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                  >
+                    <ImageIconLucide className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">PNG</span>
+                    <span className="sm:hidden">PNG</span>
+                  </button>
+                </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Hidden receipt for download */}
+        {selectedOrder && (
+          <div className="fixed -top-full -left-full opacity-0 pointer-events-none">
+            <TransactionReceipt order={selectedOrder} />
           </div>
         )}
       </div>

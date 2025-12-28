@@ -29,16 +29,23 @@ export function AnnouncementModal() {
       const response = await api.get('/announcements/active');
       const activeAnnouncement = response.data;
 
+      console.log('📢 Annonce active:', activeAnnouncement);
+
       if (!activeAnnouncement) {
+        console.log('Aucune annonce active trouvée');
         return;
       }
 
       // Vérifier si on doit afficher l'annonce
       const shouldShow = checkShouldShowAnnouncement(activeAnnouncement);
+      console.log('Doit afficher l\'annonce?', shouldShow);
 
       if (shouldShow) {
+        console.log('Affichage de l\'annonce:', activeAnnouncement.title);
         setAnnouncement(activeAnnouncement);
         setShowModal(true);
+      } else {
+        console.log('Annonce déjà affichée aujourd\'hui');
       }
     } catch (error) {
       console.error('Error loading announcement:', error);
@@ -131,13 +138,6 @@ export function AnnouncementModal() {
 
             {/* Content */}
             <div className="overflow-y-auto max-h-[90vh]">
-              {/* Title */}
-              {announcement.title && (
-                <div className="bg-gradient-to-r from-primary to-primary/80 text-white p-6">
-                  <h2 className="text-2xl font-bold text-center">{announcement.title}</h2>
-                </div>
-              )}
-
               {/* File Display */}
               <div className="p-6">
                 {announcement.fileType === 'IMAGE' ? (

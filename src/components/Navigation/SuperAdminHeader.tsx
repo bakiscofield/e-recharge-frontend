@@ -18,7 +18,10 @@ import {
   Crown,
   UserCog,
   MessageSquare,
-  Megaphone
+  Megaphone,
+  Gift,
+  Gamepad2,
+  Mail
 } from 'lucide-react';
 import { useAppConfig } from '@/hooks/useAppConfig';
 
@@ -34,7 +37,10 @@ export function SuperAdminHeader() {
   const navigation = [
     { name: 'Dashboard', href: '/super-admin', icon: LayoutDashboard },
     { name: 'Assignations', href: '/super-admin/agent-assignments', icon: LinkIcon },
+    { name: 'Bookmakers', href: '/super-admin/bookmakers', icon: Gamepad2 },
     { name: 'Configuration', href: '/super-admin/configuration', icon: Settings },
+    { name: 'Parrainage', href: '/super-admin/configuration-parrainage', icon: Gift },
+    { name: 'Newsletters', href: '/super-admin/newsletters', icon: Mail },
     { name: 'Thème', href: '/super-admin/theme-configurator', icon: Palette },
     { name: 'Annonces', href: '/super-admin/annonces', icon: Megaphone },
     { name: 'Chat', href: '/admin/chat', icon: MessageSquare },

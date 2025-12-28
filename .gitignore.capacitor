@@ -1,0 +1,35 @@
+# Capacitor - À ajouter à votre .gitignore principal
+
+# Android
+android/app/build/
+android/app/release/
+android/app/debug/
+android/.gradle/
+android/build/
+android/gradle/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/.idea/
+android/*.iml
+android/.cxx/
+
+# iOS (si vous ajoutez iOS plus tard)
+ios/App/build/
+ios/App/Pods/
+ios/App/App.xcworkspace/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/Podfile.lock
+
+# Keystore et fichiers sensibles (NE JAMAIS COMMIT!)
+*.keystore
+*.jks
+android/key.properties
+release-key.keystore
+
+# Capacitor
+.capacitor/
+capacitor-cordova-android-plugins/
+
+# Node modules (si pas déjà dans .gitignore)
+node_modules/

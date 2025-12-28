@@ -14,7 +14,16 @@
     "generate:icons": "node scripts/generate-missing-icons.js",
     "generate:screenshots": "node scripts/capture-screenshots.js",
     "generate:store-assets": "node scripts/generate-all-store-assets.js",
-    "update:assetlinks": "node scripts/update-assetlinks.js"
+    "update:assetlinks": "node scripts/update-assetlinks.js",
+    "cap:init": "npx cap init",
+    "cap:add:android": "npx cap add android",
+    "cap:sync": "npx cap sync",
+    "cap:sync:prod": "CAPACITOR_SERVER_URL=https://votre-domaine.com npx cap sync",
+    "cap:open": "npx cap open android",
+    "cap:build:debug": "cd android && ./gradlew assembleDebug && cd ..",
+    "cap:build:release": "cd android && ./gradlew assembleRelease && cd ..",
+    "cap:install:debug": "adb install android/app/build/outputs/apk/debug/app-debug.apk",
+    "cap:install:release": "adb install android/app/build/outputs/apk/release/app-release.apk"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -24,6 +33,8 @@
     "clsx": "^2.1.0",
     "dayjs": "^1.11.10",
     "framer-motion": "^10.18.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.312.0",
     "next": "^14.1.0",
     "postcss": "^8.4.33",
@@ -38,6 +49,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/jspdf": "^1.3.3",
     "@types/minimatch": "^5.1.2",
     "@types/node": "^20.11.5",
     "@types/react": "^18.2.48",

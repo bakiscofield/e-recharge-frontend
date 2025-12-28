@@ -483,11 +483,11 @@ export default function AgentAssignmentsPage() {
                   type="tel"
                   value={formData.phoneNumber}
                   onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  placeholder="+228 90 12 34 56"
+                  placeholder="90 12 34 56"
                   className="w-full px-4 py-3 bg-[#0a0a1f] border border-purple-500/30 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  Numéro du compte marchand Mobile Money
+                  Numéro du compte marchand (pas besoin de +228 ou 228)
                 </p>
               </div>
 

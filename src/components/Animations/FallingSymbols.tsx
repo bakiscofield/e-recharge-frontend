@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import type { ThemeConfig } from '@/types/shared';
 
 interface Symbol {
   id: number;
@@ -31,24 +32,35 @@ const SYMBOLS = [
   '✨', // Étincelles
 ];
 
-export default function FallingSymbols() {
+interface FallingSymbolsProps {
+  themeConfig?: Partial<ThemeConfig> | null;
+}
+
+export default function FallingSymbols({ themeConfig }: FallingSymbolsProps) {
   const [symbols, setSymbols] = useState<Symbol[]>([]);
+
+  // Utiliser les paramètres du thème ou valeurs par défaut
+  const animationSpeed = themeConfig?.animationSpeed || 1.0;
+  const glowIntensity = themeConfig?.glowIntensity || 0.8;
+  const symbolCount = 15; // Nombre de symboles
 
   useEffect(() => {
     // Générer des symboles aléatoires
     const generateSymbols = () => {
       const newSymbols: Symbol[] = [];
-      const count = 15; // Nombre de symboles à l'écran
 
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < symbolCount; i++) {
+        const baseDuration = 8 + Math.random() * 7; // Durée de base entre 8 et 15 secondes
+        const adjustedDuration = baseDuration / animationSpeed; // Ajuster selon la vitesse
+
         newSymbols.push({
           id: i,
           icon: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
           x: Math.random() * 100, // Position X en pourcentage
-          duration: 8 + Math.random() * 7, // Durée entre 8 et 15 secondes
+          duration: adjustedDuration,
           delay: Math.random() * 5, // Délai initial
           size: 20 + Math.random() * 30, // Taille entre 20 et 50px
-          opacity: 0.1 + Math.random() * 0.15, // Opacité entre 0.1 et 0.25
+          opacity: (0.1 + Math.random() * 0.15) * glowIntensity, // Opacité ajustée selon l'intensité
         });
       }
 
@@ -63,7 +75,7 @@ export default function FallingSymbols() {
     }, 10000); // Toutes les 10 secondes
 
     return () => clearInterval(interval);
-  }, []);
+  }, [animationSpeed, glowIntensity, symbolCount]);
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">

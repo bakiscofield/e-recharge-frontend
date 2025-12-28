@@ -8,6 +8,7 @@ import { createOrder } from '@/store/slices/ordersSlice';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { Building2, Wallet, DollarSign, Phone, Key, MapPin, ArrowRight } from 'lucide-react';
+import { WaitingModal } from '@/components/Modal/WaitingModal';
 
 export default function RetraitPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,6 +20,7 @@ export default function RetraitPage() {
   const [agents, setAgents] = useState<any[]>([]);
   const [savedIds, setSavedIds] = useState<any[]>([]);
   const [useNewId, setUseNewId] = useState(false);
+  const [showWaitingModal, setShowWaitingModal] = useState(false);
 
   const [formData, setFormData] = useState({
     bookmakerId: '',
@@ -152,7 +154,8 @@ export default function RetraitPage() {
       console.log('Données envoyées:', orderData);
       await dispatch(createOrder(orderData)).unwrap();
 
-      toast.success('Retrait créé avec succès !');
+      // Show waiting modal instead of toast
+      setShowWaitingModal(true);
       setStep(1);
       setFormData({
         ...formData,
@@ -502,6 +505,13 @@ export default function RetraitPage() {
           </div>
         )}
       </div>
+
+      {/* Waiting Modal */}
+      <WaitingModal
+        isOpen={showWaitingModal}
+        onClose={() => setShowWaitingModal(false)}
+        type="RETRAIT"
+      />
     </AppLayout>
   );
 }

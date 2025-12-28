@@ -99,11 +99,14 @@ export default function LoginPage() {
                     type="text"
                     value={emailData.identifier}
                     onChange={(e) => setEmailData({ ...emailData, identifier: e.target.value })}
-                    placeholder="email@exemple.com ou +228..."
+                    placeholder="email@exemple.com ou 90123456"
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
                 </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Pour téléphone: pas besoin de +228 ou 228
+                </p>
               </div>
 
               <div>

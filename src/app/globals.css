@@ -29,6 +29,18 @@ body {
   width: 100%;
 }
 
+/* Fix pour les selects - forcer le fond blanc */
+select {
+  background-color: white !important;
+  color: #111827 !important;
+}
+
+select option {
+  background-color: white !important;
+  color: #111827 !important;
+  padding: 8px !important;
+}
+
 @layer utilities {
   .safe-top {
     padding-top: env(safe-area-inset-top);

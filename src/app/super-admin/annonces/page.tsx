@@ -260,30 +260,37 @@ export default function AnnouncementsPage() {
                     {/* File Upload */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Fichier (Image ou PDF)
+                        Fichier (Image ou PDF) *
                       </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition">
-                        <input
-                          type="file"
-                          accept="image/*,.pdf"
-                          onChange={handleFileChange}
-                          className="hidden"
-                          id="file-upload"
-                          disabled={uploading}
-                        />
-                        <label
-                          htmlFor="file-upload"
-                          className="cursor-pointer flex flex-col items-center"
-                        >
-                          <Upload className="h-12 w-12 text-gray-400 mb-2" />
-                          <span className="text-sm text-gray-600">
-                            Cliquez pour sélectionner un fichier
-                          </span>
-                          <span className="text-xs text-gray-500 mt-1">
-                            Images (JPEG, PNG, GIF) ou PDF • Max 5MB
-                          </span>
-                        </label>
-                      </div>
+                      {!formData.file ? (
+                        <div className="border-2 border-dashed border-primary/50 bg-primary/5 rounded-lg p-8 text-center hover:border-primary hover:bg-primary/10 transition-all">
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            id="file-upload"
+                            disabled={uploading}
+                          />
+                          <label
+                            htmlFor="file-upload"
+                            className="cursor-pointer flex flex-col items-center"
+                          >
+                            <div className="bg-primary/10 p-4 rounded-full mb-3">
+                              <Upload className="h-8 w-8 text-primary" />
+                            </div>
+                            <span className="text-base font-medium text-gray-900 mb-1">
+                              Cliquez ici pour sélectionner un fichier
+                            </span>
+                            <span className="text-sm text-gray-600 mt-1">
+                              Images (JPEG, PNG, GIF) ou PDF
+                            </span>
+                            <span className="text-xs text-gray-500 mt-1">
+                              Taille maximale: 5MB
+                            </span>
+                          </label>
+                        </div>
+                      ) : null}
 
                       {/* Preview */}
                       {formData.file && (

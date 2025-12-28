@@ -160,6 +160,8 @@ export interface ThemeConfig {
   backgroundType: 'gradient' | 'particles' | 'video' | 'image' | 'matrix';
   backgroundImage?: string;
   backgroundVideo?: string;
+  clientBackgroundType?: 'animation' | 'image';
+  clientBackgroundImage?: string;
   fontFamily: string;
   fontSizeBase: number;
   borderRadius: number;
