@@ -75,7 +75,7 @@ export default function AgentAssignmentsPage() {
     try {
       const [assignmentsRes, agentsRes, bookmakersRes, paymentMethodsRes] = await Promise.all([
         api.get('/super-admin/agent-assignments'),
-        api.get('/super-admin/admins'),
+        api.get('/super-admin/agents'),
         api.get('/bookmakers'),
         api.get('/payment-methods'),
       ]);

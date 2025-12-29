@@ -36,6 +36,7 @@ export function SuperAdminHeader() {
 
   const navigation = [
     { name: 'Dashboard', href: '/super-admin', icon: LayoutDashboard },
+    { name: 'Utilisateurs', href: '/super-admin/users', icon: Users },
     { name: 'Assignations', href: '/super-admin/agent-assignments', icon: LinkIcon },
     { name: 'Bookmakers', href: '/super-admin/bookmakers', icon: Gamepad2 },
     { name: 'Configuration', href: '/super-admin/configuration', icon: Settings },

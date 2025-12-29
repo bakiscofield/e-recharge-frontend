@@ -54,8 +54,25 @@ interface User {
 
 export default function SuperAdminDashboard() {
   const [statistics, setStatistics] = useState<Statistics | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'admins' | 'users' | 'config' | 'theme'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'admins' | 'agents' | 'users' | 'config' | 'theme'>('overview');
   const [loading, setLoading] = useState(true);
+
+  // Listen for hash changes to set active tab
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && ['overview', 'admins', 'agents', 'users', 'config', 'theme'].includes(hash)) {
+        setActiveTab(hash as any);
+      }
+    };
+
+    // Set initial tab from hash
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Admin management states
   const [admins, setAdmins] = useState<Admin[]>([]);
@@ -68,7 +85,23 @@ export default function SuperAdminDashboard() {
     lastName: '',
     phone: '',
     password: '',
+    country: 'TG',
     role: 'ADMIN',
+  });
+
+  // Agent management states
+  const [agents, setAgents] = useState<Admin[]>([]);
+  const [agentSearch, setAgentSearch] = useState('');
+  const [showAgentModal, setShowAgentModal] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<Admin | null>(null);
+  const [agentFormData, setAgentFormData] = useState({
+    email: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    password: '',
+    country: 'TG',
+    role: 'AGENT',
   });
 
   // User management states
@@ -95,6 +128,8 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     if (activeTab === 'admins') {
       fetchAdmins();
+    } else if (activeTab === 'agents') {
+      fetchAgents();
     } else if (activeTab === 'users') {
       fetchUsers();
     }
@@ -184,6 +219,7 @@ export default function SuperAdminDashboard() {
       lastName: admin.lastName,
       phone: admin.phone,
       password: '',
+      country: 'TG',
       role: admin.role,
     });
     setShowAdminModal(true);
@@ -196,9 +232,105 @@ export default function SuperAdminDashboard() {
       lastName: '',
       phone: '',
       password: '',
+      country: 'TG',
       role: 'ADMIN',
     });
     setEditingAdmin(null);
+  };
+
+  // Agent Management Functions
+  const fetchAgents = async () => {
+    try {
+      const response = await api.get('/super-admin/agents');
+      setAgents(Array.isArray(response.data) ? response.data : []);
+    } catch (error: any) {
+      toast.error('Erreur lors du chargement des agents');
+      console.error(error);
+      setAgents([]);
+    }
+  };
+
+  const handleCreateAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await api.post('/super-admin/agents', agentFormData);
+      const assignmentsCount = response.data?.assignmentsCreated || 0;
+      toast.success(
+        `Agent créé avec succès ! ${assignmentsCount} assignation(s) automatique(s) créée(s).`
+      );
+      setShowAgentModal(false);
+      resetAgentForm();
+      fetchAgents();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Erreur lors de la création');
+    }
+  };
+
+  const handleUpdateAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAgent) return;
+    try {
+      await api.put(`/super-admin/agents/${editingAgent.id}`, {
+        firstName: agentFormData.firstName,
+        lastName: agentFormData.lastName,
+        phone: agentFormData.phone,
+        email: agentFormData.email,
+      });
+      toast.success('Agent mis à jour avec succès');
+      setShowAgentModal(false);
+      resetAgentForm();
+      fetchAgents();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour');
+    }
+  };
+
+  const handleToggleAgentStatus = async (agentId: string, currentStatus: boolean) => {
+    try {
+      await api.put(`/super-admin/agents/${agentId}/status`, { isActive: !currentStatus });
+      toast.success(`Agent ${!currentStatus ? 'activé' : 'désactivé'} avec succès`);
+      fetchAgents();
+    } catch (error: any) {
+      toast.error('Erreur lors du changement de statut');
+    }
+  };
+
+  const handleDeleteAgent = async (agentId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) return;
+    try {
+      await api.delete(`/super-admin/agents/${agentId}`);
+      toast.success('Agent supprimé avec succès');
+      fetchAgents();
+    } catch (error: any) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const openEditAgentModal = (agent: Admin) => {
+    setEditingAgent(agent);
+    setAgentFormData({
+      email: agent.email,
+      firstName: agent.firstName,
+      lastName: agent.lastName,
+      phone: agent.phone,
+      password: '',
+      country: 'TG',
+      role: agent.role,
+    });
+    setShowAgentModal(true);
+  };
+
+  const resetAgentForm = () => {
+    setAgentFormData({
+      email: '',
+      firstName: '',
+      lastName: '',
+      phone: '',
+      password: '',
+      country: 'TG',
+      role: 'AGENT',
+    });
+    setEditingAgent(null);
   };
 
   // User Management Functions
@@ -270,6 +402,12 @@ export default function SuperAdminDashboard() {
       .includes(adminSearch.toLowerCase())
   );
 
+  const filteredAgents = agents.filter(agent =>
+    `${agent.firstName} ${agent.lastName} ${agent.email} ${agent.phone}`
+      .toLowerCase()
+      .includes(agentSearch.toLowerCase())
+  );
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = `${user.firstName} ${user.lastName} ${user.email || ''} ${user.phone}`
       .toLowerCase()
@@ -285,6 +423,7 @@ export default function SuperAdminDashboard() {
   const tabs = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: '📊' },
     { id: 'admins', label: 'Admins', icon: '👥' },
+    { id: 'agents', label: 'Agents', icon: '🎯' },
     { id: 'users', label: 'Utilisateurs', icon: '👤' },
     { id: 'config', label: 'Configuration', icon: '⚙️' },
     { id: 'theme', label: 'Thème & UI', icon: '🎨' },
@@ -441,6 +580,13 @@ export default function SuperAdminDashboard() {
                   Créer un Admin
                 </button>
                 <button
+                  className="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition"
+                  onClick={() => setActiveTab('agents')}
+                >
+                  <span className="mr-2">🎯</span>
+                  Gérer les Agents
+                </button>
+                <button
                   className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
                   onClick={() => window.location.href = '/super-admin/agent-assignments'}
                 >
@@ -550,6 +696,105 @@ export default function SuperAdminDashboard() {
                           </button>
                           <button
                             onClick={() => handleDeleteAdmin(admin.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Agents Tab */}
+        {activeTab === 'agents' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestion des Agents</h2>
+                <button
+                  onClick={() => {
+                    resetAgentForm();
+                    setShowAgentModal(true);
+                  }}
+                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition flex items-center gap-2"
+                >
+                  <UserPlus className="h-5 w-5" />
+                  Nouvel Agent
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="mb-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher un agent..."
+                    value={agentSearch}
+                    onChange={(e) => setAgentSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Agents List */}
+              <div className="space-y-3">
+                {filteredAgents.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    {agentSearch ? 'Aucun agent trouvé' : 'Aucun agent pour le moment'}
+                  </div>
+                ) : (
+                  filteredAgents.map((agent) => (
+                    <div key={agent.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="font-bold text-gray-900">
+                              {agent.firstName} {agent.lastName}
+                            </h3>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              agent.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                              {agent.isActive ? 'Actif' : 'Inactif'}
+                            </span>
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                              {agent.role}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <p>📧 {agent.email}</p>
+                            <p>📱 {agent.phone}</p>
+                            <p className="text-xs text-gray-400">Créé le {new Date(agent.createdAt).toLocaleDateString('fr-FR')}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openEditAgentModal(agent)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                            title="Modifier"
+                          >
+                            <Edit2 className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleToggleAgentStatus(agent.id, agent.isActive)}
+                            className={`p-2 rounded-lg transition ${
+                              agent.isActive ? 'text-orange-600 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'
+                            }`}
+                            title={agent.isActive ? 'Désactiver' : 'Activer'}
+                          >
+                            {agent.isActive ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAgent(agent.id)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                             title="Supprimer"
                           >
@@ -942,6 +1187,20 @@ export default function SuperAdminDashboard() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Pays</label>
+                  <select
+                    value={adminFormData.country}
+                    onChange={(e) => setAdminFormData({ ...adminFormData, country: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  >
+                    <option value="TG">Togo</option>
+                    <option value="BJ">Bénin</option>
+                    <option value="CI">Côte d'Ivoire</option>
+                  </select>
+                </div>
+
                 {!editingAdmin && (
                   <>
                     <div>
@@ -985,6 +1244,125 @@ export default function SuperAdminDashboard() {
                     className="flex-1 px-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition"
                   >
                     {editingAdmin ? 'Mettre à jour' : 'Créer'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Agent Modal */}
+        {showAgentModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-md"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {editingAgent ? 'Modifier Agent' : 'Nouvel Agent'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAgentModal(false);
+                    resetAgentForm();
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={editingAgent ? handleUpdateAgent : handleCreateAgent} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                  <input
+                    type="text"
+                    value={agentFormData.firstName}
+                    onChange={(e) => setAgentFormData({ ...agentFormData, firstName: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                  <input
+                    type="text"
+                    value={agentFormData.lastName}
+                    onChange={(e) => setAgentFormData({ ...agentFormData, lastName: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={agentFormData.email}
+                    onChange={(e) => setAgentFormData({ ...agentFormData, email: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                    disabled={!!editingAgent}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                  <input
+                    type="tel"
+                    value={agentFormData.phone}
+                    onChange={(e) => setAgentFormData({ ...agentFormData, phone: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Pays</label>
+                  <select
+                    value={agentFormData.country}
+                    onChange={(e) => setAgentFormData({ ...agentFormData, country: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  >
+                    <option value="TG">Togo</option>
+                    <option value="BJ">Bénin</option>
+                    <option value="CI">Côte d'Ivoire</option>
+                  </select>
+                </div>
+
+                {!editingAgent && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                    <input
+                      type="password"
+                      value={agentFormData.password}
+                      onChange={(e) => setAgentFormData({ ...agentFormData, password: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      required
+                    />
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAgentModal(false);
+                      resetAgentForm();
+                    }}
+                    className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition"
+                  >
+                    {editingAgent ? 'Mettre à jour' : 'Créer'}
                   </button>
                 </div>
               </form>
