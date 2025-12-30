@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Service Worker - AliceBot</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #3B82F6;
+            margin-top: 0;
+        }
+        button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #2563EB;
+        }
+        .danger {
+            background: #EF4444;
+        }
+        .danger:hover {
+            background: #DC2626;
+        }
+        .success {
+            background: #10B981;
+        }
+        pre {
+            background: #1F2937;
+            color: #10B981;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #FEF3C7;
+            border-left: 4px solid #F59E0B;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔧 Reset Service Worker</h1>
+        <p>Utilisez cette page pour résoudre les problèmes de service worker et notifications.</p>
+
+        <div class="status" id="status">
+            Status: Vérification en cours...
+        </div>
+
+        <h3>Actions disponibles :</h3>
+
+        <button onclick="checkStatus()">🔍 Vérifier le statut</button>
+        <button onclick="unregisterAll()" class="danger">🗑️ Désinstaller tous les SW</button>
+        <button onclick="clearCaches()" class="danger">🧹 Vider tous les caches</button>
+        <button onclick="resetAll()" class="danger">♻️ Reset complet</button>
+        <button onclick="goBack()" class="success">✅ Retour à l'app</button>
+
+        <h3>Console :</h3>
+        <pre id="console"></pre>
+    </div>
+
+    <script>
+        const consoleEl = document.getElementById('console');
+        const statusEl = document.getElementById('status');
+
+        function log(message) {
+            const time = new Date().toLocaleTimeString();
+            consoleEl.textContent += `[${time}] ${message}\n`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(message, type = 'info') {
+            statusEl.textContent = message;
+            statusEl.style.background = type === 'success' ? '#D1FAE5' :
+                                       type === 'error' ? '#FEE2E2' : '#FEF3C7';
+            statusEl.style.borderLeftColor = type === 'success' ? '#10B981' :
+                                            type === 'error' ? '#EF4444' : '#F59E0B';
+        }
+
+        async function checkStatus() {
+            log('🔍 Vérification du statut...');
+
+            // Service Workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                log(`📋 Service Workers enregistrés: ${registrations.length}`);
+                registrations.forEach((reg, index) => {
+                    log(`  ${index + 1}. Scope: ${reg.scope}`);
+                    log(`     State: ${reg.active?.state || 'N/A'}`);
+                    log(`     URL: ${reg.active?.scriptURL || 'N/A'}`);
+                });
+
+                if (navigator.serviceWorker.controller) {
+                    log(`✅ Service Worker actif: ${navigator.serviceWorker.controller.scriptURL}`);
+                } else {
+                    log(`⚠️ Aucun Service Worker en contrôle`);
+                }
+            } else {
+                log('❌ Service Workers non supportés');
+            }
+
+            // Notifications
+            if ('Notification' in window) {
+                log(`🔔 Permission notifications: ${Notification.permission}`);
+            }
+
+            // Caches
+            const cacheNames = await caches.keys();
+            log(`💾 Caches: ${cacheNames.length}`);
+            cacheNames.forEach(name => log(`  - ${name}`));
+
+            // localStorage
+            log(`📦 localStorage items: ${Object.keys(localStorage).length}`);
+
+            updateStatus(`✅ Vérification terminée - ${registrations?.length || 0} SW trouvés`, 'success');
+        }
+
+        async function unregisterAll() {
+            if (!confirm('Désinstaller tous les service workers ?')) return;
+
+            log('🗑️ Désinstallation de tous les service workers...');
+
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            let count = 0;
+
+            for (const registration of registrations) {
+                log(`  Désinstallation: ${registration.scope}`);
+                await registration.unregister();
+                count++;
+            }
+
+            log(`✅ ${count} service worker(s) désinstallé(s)`);
+            updateStatus(`✅ ${count} service worker(s) désinstallé(s)`, 'success');
+        }
+
+        async function clearCaches() {
+            if (!confirm('Vider tous les caches ?')) return;
+
+            log('🧹 Vidage de tous les caches...');
+
+            const cacheNames = await caches.keys();
+            let count = 0;
+
+            for (const cacheName of cacheNames) {
+                log(`  Suppression: ${cacheName}`);
+                await caches.delete(cacheName);
+                count++;
+            }
+
+            log(`✅ ${count} cache(s) supprimé(s)`);
+            updateStatus(`✅ ${count} cache(s) supprimé(s)`, 'success');
+        }
+
+        async function resetAll() {
+            if (!confirm('⚠️ RESET COMPLET ?\n\nCela va :\n- Désinstaller tous les SW\n- Vider tous les caches\n- Vider le localStorage\n\nContinuer ?')) {
+                return;
+            }
+
+            log('♻️ RESET COMPLET en cours...');
+
+            // 1. Désinstaller SW
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const reg of registrations) {
+                await reg.unregister();
+                log(`  ✅ SW désinstallé: ${reg.scope}`);
+            }
+
+            // 2. Vider caches
+            const cacheNames = await caches.keys();
+            for (const cacheName of cacheNames) {
+                await caches.delete(cacheName);
+                log(`  ✅ Cache supprimé: ${cacheName}`);
+            }
+
+            // 3. Vider localStorage
+            const itemsCount = Object.keys(localStorage).length;
+            localStorage.clear();
+            log(`  ✅ localStorage vidé (${itemsCount} items)`);
+
+            log('');
+            log('✅ RESET COMPLET TERMINÉ !');
+            log('🔄 Rechargement de la page dans 3 secondes...');
+
+            updateStatus('✅ Reset complet terminé ! Rechargement...', 'success');
+
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 3000);
+        }
+
+        function goBack() {
+            window.location.href = '/';
+        }
+
+        // Vérifier automatiquement au chargement
+        window.addEventListener('load', checkStatus);
+    </script>
+</body>
+</html>

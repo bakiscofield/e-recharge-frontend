@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { SuperAdminLayout } from '@/components/Layout/SuperAdminLayout';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Search, Edit2, Trash2, UserPlus, Eye, EyeOff, X } from 'lucide-react';
+import { Search, Edit2, Trash2, UserPlus, Eye, EyeOff, X, Bell } from 'lucide-react';
 
 interface Statistics {
   users: {
@@ -438,19 +438,43 @@ export default function SuperAdminDashboard() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 text-gray-900">
-            Dashboard Super Admin
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600">Contrôle total de la plateforme</p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 text-gray-900">
+                Dashboard Super Admin
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600">Contrôle total de la plateforme</p>
+            </div>
+            {/* Bouton de test des notifications */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={async () => {
+                try {
+                  await api.post('/notifications/test', {
+                    title: '🧪 Test de notification',
+                    body: `Test envoyé à ${new Date().toLocaleTimeString('fr-FR')}`
+                  });
+                  toast.success('✅ Notification de test envoyée !');
+                } catch (error: any) {
+                  toast.error('❌ ' + (error.response?.data?.message || 'Erreur'));
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-lg"
+            >
+              <Bell size={20} />
+              <span className="font-medium">Tester notif</span>
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-hide">
+        <div className="flex gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-hide">
           {tabs.map((tab) => (
             <motion.button
               key={tab.id}
               className={`
-                px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap flex-shrink-0
+                px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap flex-shrink-0
                 transition-all duration-300
                 ${activeTab === tab.id
                   ? 'bg-primary text-white shadow-md'
@@ -461,8 +485,8 @@ export default function SuperAdminDashboard() {
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab(tab.id as any)}
             >
-              <span className="mr-2">{tab.icon}</span>
-              {tab.label}
+              <span className="mr-1 sm:mr-2">{tab.icon}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
             </motion.button>
           ))}
         </div>
@@ -475,20 +499,20 @@ export default function SuperAdminDashboard() {
             className="space-y-6"
           >
             {/* Revenue Card */}
-            <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-8 text-white shadow-xl">
-              <div className="flex items-center justify-between">
+            <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-4 sm:p-6 md:p-8 text-white shadow-xl">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-2xl font-bold mb-2">Revenus Total</h3>
-                  <p className="text-white/90">Commissions générées</p>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">Revenus Total</h3>
+                  <p className="text-sm sm:text-base text-white/90">Commissions générées</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-3xl font-bold">{statistics.orders.revenue.toLocaleString()} FCFA</p>
+                <div className="text-left sm:text-right">
+                  <p className="text-2xl sm:text-3xl font-bold">{statistics.orders.revenue.toLocaleString()} FCFA</p>
                 </div>
               </div>
             </div>
 
             {/* Statistics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {/* Users Card */}
               <div className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform" />
@@ -569,43 +593,43 @@ export default function SuperAdminDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Actions rapides</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Actions rapides</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
                 <button
-                  className="px-4 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition"
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition text-sm sm:text-base"
                   onClick={() => setActiveTab('admins')}
                 >
-                  <span className="mr-2">➕</span>
-                  Créer un Admin
+                  <span className="mr-1 sm:mr-2">➕</span>
+                  <span className="hidden sm:inline">Créer un </span>Admin
                 </button>
                 <button
-                  className="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition"
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition text-sm sm:text-base"
                   onClick={() => setActiveTab('agents')}
                 >
-                  <span className="mr-2">🎯</span>
-                  Gérer les Agents
+                  <span className="mr-1 sm:mr-2">🎯</span>
+                  <span className="hidden sm:inline">Gérer </span>Agents
                 </button>
                 <button
-                  className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition text-sm sm:text-base"
                   onClick={() => window.location.href = '/super-admin/agent-assignments'}
                 >
-                  <span className="mr-2">🔗</span>
-                  Assignations Agents
+                  <span className="mr-1 sm:mr-2">🔗</span>
+                  Assignations
                 </button>
                 <button
-                  className="px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition"
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition text-sm sm:text-base"
                   onClick={() => window.location.href = '/super-admin/configuration'}
                 >
-                  <span className="mr-2">⚙️</span>
-                  Configuration Complète
+                  <span className="mr-1 sm:mr-2">⚙️</span>
+                  Configuration
                 </button>
                 <button
-                  className="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition"
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition text-sm sm:text-base"
                   onClick={() => window.location.href = '/super-admin/theme-configurator'}
                 >
-                  <span className="mr-2">🎨</span>
-                  Personnaliser le Thème
+                  <span className="mr-1 sm:mr-2">🎨</span>
+                  Thème
                 </button>
               </div>
             </div>
@@ -618,9 +642,9 @@ export default function SuperAdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestion des Admins</h2>
+            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Gestion des Admins</h2>
                 <button
                   onClick={() => {
                     resetAdminForm();
@@ -717,9 +741,9 @@ export default function SuperAdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestion des Agents</h2>
+            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Gestion des Agents</h2>
                 <button
                   onClick={() => {
                     resetAgentForm();
@@ -816,11 +840,11 @@ export default function SuperAdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Gestion des Utilisateurs</h2>
+            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Gestion des Utilisateurs</h2>
 
               {/* Search and Filters */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
@@ -939,13 +963,13 @@ export default function SuperAdminDashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Configuration Globale</h2>
-              <p className="text-gray-600 mb-8">
+            <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm border border-gray-100">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Configuration Globale</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
                 Gérez tous les aspects de l'application : branding, bookmakers, méthodes de paiement, et interface utilisateur.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div
                   className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg border border-gray-200 hover:border-primary transition-all cursor-pointer group hover:shadow-md"
                   onClick={() => window.location.href = '/super-admin/configuration'}
@@ -1037,13 +1061,13 @@ export default function SuperAdminDashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Personnalisation Visuelle</h2>
-              <p className="text-gray-600 mb-8">
+            <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm border border-gray-100">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Personnalisation Visuelle</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
                 Créez une expérience visuelle unique avec le configurateur de thème avancé.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 <div className="p-6 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg border border-gray-200 hover:shadow-md transition">
                   <div className="text-3xl mb-3">🎨</div>
                   <h3 className="text-lg font-bold text-gray-900 mb-2">Couleurs</h3>

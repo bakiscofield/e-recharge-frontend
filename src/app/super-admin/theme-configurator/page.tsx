@@ -155,26 +155,26 @@ export default function ThemeConfigurator() {
 
   return (
     <SuperAdminLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pb-6">
         {/* Header */}
         <motion.div
-          className="mb-8 flex justify-between items-center"
+          className="mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div>
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
               Configurateur de Thème
             </h1>
-            <p className="text-gray-600">Personnalisation 100% de l'interface client</p>
+            <p className="text-sm sm:text-base text-gray-600">Personnalisation 100% de l'interface client</p>
           </div>
-          <div className="flex gap-4">
-            <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition"
+          <div className="flex gap-2 sm:gap-4 w-full sm:w-auto">
+            <button className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition text-sm sm:text-base"
               onClick={() => setPreviewMode(previewMode === 'desktop' ? 'mobile' : 'desktop')}
             >
               {previewMode === 'desktop' ? '📱 Mobile' : '🖥️ Desktop'}
             </button>
-            <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+            <button className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               onClick={handleSave}
               disabled={saving}
             >
@@ -183,13 +183,13 @@ export default function ThemeConfigurator() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Configuration Panel */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-4 sm:space-y-6">
             {/* Colors Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <div className="p-6 space-y-4">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">🎨 Couleurs</h3>
+            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <div className="p-3 sm:p-6 space-y-3 sm:space-y-4">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">🎨 Couleurs</h3>
                 <ColorPicker
                   label="Primaire"
                   value={theme.primaryColor || '#00f0ff'}
@@ -219,9 +219,9 @@ export default function ThemeConfigurator() {
             </div>
 
             {/* Effects Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <div className="p-6 space-y-4">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">✨ Effets</h3>
+            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+              <div className="p-3 sm:p-6 space-y-3 sm:space-y-4">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">✨ Effets</h3>
                 <Slider
                   label="Intensité luminosité"
                   value={theme.glowIntensity}

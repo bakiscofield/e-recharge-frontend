@@ -189,35 +189,35 @@ export default function ConfigurationPage() {
 
   return (
     <SuperAdminLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pb-6">
         {/* Header */}
         <motion.div
-          className="mb-8"
+          className="mb-6 sm:mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             Configuration Complète
           </h1>
-          <p className="text-gray-600">Gérez tous les aspects de l'application client</p>
+          <p className="text-sm sm:text-base text-gray-600">Gérez tous les aspects de l'application client</p>
         </motion.div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`
-                flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
+                flex items-center gap-1 sm:gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg font-medium transition-all whitespace-nowrap flex-shrink-0 text-sm sm:text-base
                 ${activeTab === tab.id
                   ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-gray-900 shadow-lg'
                   : 'bg-gray-800/50 text-gray-600 hover:text-gray-900 hover:bg-gray-700/50'
                 }
               `}
             >
-              <tab.icon className="w-5 h-5" />
-              {tab.label}
+              <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -232,17 +232,17 @@ export default function ConfigurationPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
             >
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">🎨 Image de marque</h2>
-                    <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed" onClick={saveBranding} disabled={saving}>
-                      <Save className="w-4 h-4 mr-2" />
+              <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+                <div className="p-3 sm:p-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">🎨 Image de marque</h2>
+                    <button className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" onClick={saveBranding} disabled={saving}>
+                      <Save className="w-4 h-4" />
                       Sauvegarder
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     {/* Left Column */}
                     <div className="space-y-6">
                       <div>
@@ -388,19 +388,19 @@ export default function ConfigurationPage() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">🎰 Bookmakers</h2>
-                    <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition"
+              <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+                <div className="p-3 sm:p-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">🎰 Bookmakers</h2>
+                    <button className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition flex items-center justify-center gap-2"
                       onClick={() => setEditingBookmaker({ name: '', isActive: true, priority: 0 })}
                     >
-                      <Plus className="w-4 h-4 mr-2" />
+                      <Plus className="w-4 h-4" />
                       Nouveau bookmaker
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {bookmakers.map((bookmaker) => (
                       <div
                         key={bookmaker.id}
@@ -556,11 +556,11 @@ export default function ConfigurationPage() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">💳 Méthodes de paiement</h2>
-                    <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition"
+              <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+                <div className="p-3 sm:p-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">💳 Méthodes de paiement</h2>
+                    <button className="w-full sm:w-auto px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition flex items-center justify-center gap-2"
                       onClick={() => setEditingPayment({
                         name: '',
                         type: 'MOBILE_MONEY',
@@ -570,12 +570,12 @@ export default function ConfigurationPage() {
                         fees: 0
                       })}
                     >
-                      <Plus className="w-4 h-4 mr-2" />
+                      <Plus className="w-4 h-4" />
                       Nouvelle méthode
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {paymentMethods.map((method) => (
                       <div
                         key={method.id}
@@ -778,10 +778,10 @@ export default function ConfigurationPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
             >
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">🎨 Composants d'interface</h2>
-                  <p className="text-gray-600 mb-6">
+              <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+                <div className="p-3 sm:p-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">🎨 Composants d'interface</h2>
+                  <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
                     Pour une configuration avancée du thème, utilisez le{' '}
                     <a
                       href="/super-admin/theme-configurator"
@@ -791,7 +791,7 @@ export default function ConfigurationPage() {
                     </a>
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="p-6 bg-white rounded-lg border border-gray-200">
                       <h3 className="text-lg font-bold text-gray-900 mb-2">Animations</h3>
                       <p className="text-sm text-gray-600">

@@ -15,8 +15,10 @@ const initialState: NotificationsState = {
 
 export const fetchNotifications = createAsyncThunk(
   'notifications/fetch',
-  async () => {
-    const response = await api.get('/notifications');
+  async (onlyUnread = false) => {
+    const response = await api.get('/notifications', {
+      params: { onlyUnread }
+    });
     return response.data;
   }
 );

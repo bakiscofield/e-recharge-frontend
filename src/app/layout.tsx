@@ -4,6 +4,8 @@ import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
+import { FcmInitializer } from '@/components/FcmInitializer';
+import { NotificationPermissionModal } from '@/components/NotificationPermissionModal';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -65,6 +67,8 @@ export default function RootLayout({
       <body className={inter.variable}>
         <Providers>
           <ServiceWorkerRegistration />
+          <FcmInitializer />
+          <NotificationPermissionModal />
           {children}
           <Toaster position="top-center" />
         </Providers>

@@ -1,4 +1,12 @@
 // AliceBot PWA Advanced Service Worker
+console.log('[SW] Loading AliceBot Service Worker...');
+
+// Import Firebase Scripts pour FCM (DOIT être en dehors de try/catch)
+console.log('[SW] Loading Firebase scripts...');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
+console.log('[SW] ✅ Firebase scripts loaded');
+
 const CACHE_VERSION = 'v2.0.0';
 const CACHE_NAMES = {
   static: `alicebot-static-${CACHE_VERSION}`,
@@ -35,6 +43,88 @@ const EXCLUDED_URLS = [
   '/api/v1/tracking',
   '/api/v1/logs'
 ];
+
+// ========== FIREBASE CONFIGURATION ==========
+console.log('[SW] Initializing Firebase...');
+
+// Configuration Firebase (synchronisée avec le frontend)
+const firebaseConfig = {
+  apiKey: 'AIzaSyC6_uWq5NwwuvRQGbW7dx7RAtM3L2VphLs',
+  authDomain: 'e-recharge-b75ee.firebaseapp.com',
+  projectId: 'e-recharge-b75ee',
+  storageBucket: 'e-recharge-b75ee.firebasestorage.app',
+  messagingSenderId: '700766162336',
+  appId: '1:700766162336:web:85a6daacb5ae1e8b5128c5',
+  measurementId: 'G-9SS0SFQZQ2',
+};
+
+// Variable globale pour messaging
+let messaging = null;
+
+try {
+  // Initialiser Firebase
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    console.log('[SW] ✅ Firebase initialized successfully');
+  } else {
+    console.log('[SW] ✅ Firebase already initialized');
+  }
+
+  // Récupérer l'instance Messaging
+  messaging = firebase.messaging();
+  console.log('[SW] ✅ Firebase Messaging ready');
+
+  // Écouter les messages en arrière-plan
+  messaging.onBackgroundMessage((payload) => {
+    console.log('[SW] 📬 Firebase background message received:', payload);
+
+    // Extraire les données de la notification
+    const notificationTitle =
+      payload.notification?.title || payload.data?.title || 'AliceBot';
+
+    // Logo AliceBot dynamique - TOUJOURS utilisé
+    const appIcon = new URL('/icons/icon-192x192.png', self.location.origin).href;
+    const appBadge = new URL('/icons/icon-96x96.png', self.location.origin).href;
+
+    const notificationOptions = {
+      body:
+        payload.notification?.body ||
+        payload.data?.body ||
+        'Vous avez une nouvelle notification',
+      icon: appIcon,  // Logo AliceBot DYNAMIQUE
+      badge: appBadge, // Badge AliceBot DYNAMIQUE
+      image: payload.notification?.image || payload.data?.image,
+      data: {
+        ...payload.data,
+        click_action: payload.data?.url || payload.fcmOptions?.link || '/',
+      },
+      tag: payload.data?.type || 'alicebot-notification',
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+      renotify: true,
+      silent: false,
+      actions: [
+        {
+          action: 'open',
+          title: 'Ouvrir',
+          icon: appBadge,
+        },
+        {
+          action: 'close',
+          title: 'Fermer',
+        },
+      ],
+    };
+
+    // Afficher la notification
+    return self.registration.showNotification(
+      notificationTitle,
+      notificationOptions
+    );
+  });
+} catch (error) {
+  console.error('[SW] ❌ Firebase initialization error:', error);
+}
 
 // ========== INSTALLATION ==========
 self.addEventListener('install', (event) => {
@@ -307,47 +397,8 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// ========== NOTIFICATIONS PUSH ==========
-self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification reçue');
-
-  const defaultOptions = {
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-96x96.png',
-    vibrate: [200, 100, 200],
-    requireInteraction: false,
-    actions: [
-      { action: 'open', title: 'Ouvrir', icon: '/icons/icon-96x96.png' },
-      { action: 'close', title: 'Fermer' }
-    ]
-  };
-
-  let notificationData = {
-    title: 'AliceBot',
-    body: 'Nouvelle notification',
-    ...defaultOptions
-  };
-
-  if (event.data) {
-    try {
-      const data = event.data.json();
-      notificationData = {
-        title: data.title || notificationData.title,
-        body: data.message || data.body || notificationData.body,
-        ...defaultOptions,
-        data: data,
-        tag: data.tag || 'alicebot-notification',
-        renotify: true
-      };
-    } catch (error) {
-      console.error('[SW] Erreur parsing notification:', error);
-    }
-  }
-
-  event.waitUntil(
-    self.registration.showNotification(notificationData.title, notificationData)
-  );
-});
+// ========== NOTIFICATIONS PUSH (Firebase Cloud Messaging) ==========
+// Firebase Messaging est initialisé en haut du fichier (ligne 43-120)
 
 self.addEventListener('notificationclick', (event) => {
   console.log('[SW] Notification click:', event.action);
