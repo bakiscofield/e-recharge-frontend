@@ -78,11 +78,8 @@ export function ImageUpload({
         },
       });
 
-      // Construct full URL (remove /api/v1 from base URL for static files)
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-      const baseUrl = apiUrl.replace('/api/v1', '');
-      const fullUrl = `${baseUrl}${response.data.url}`;
-      onChange(fullUrl);
+      // Le backend retourne maintenant l'URL complète, pas besoin de reconstruction
+      onChange(response.data.url);
       toast.success('Image uploadée avec succès');
     } catch (error: any) {
       console.error('Upload error:', error);
