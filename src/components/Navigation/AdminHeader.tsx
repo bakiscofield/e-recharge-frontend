@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
@@ -15,6 +16,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useAppConfig } from '@/hooks/useAppConfig';
+import { AdminNotificationPanel } from '@/components/Notifications/AdminNotificationPanel';
 
 export function AdminHeader() {
   const router = useRouter();
@@ -23,6 +25,7 @@ export function AdminHeader() {
   const { user } = useSelector((state: RootState) => state.auth);
   const { unreadCount } = useSelector((state: RootState) => state.chat);
   const { appName, appLogo } = useAppConfig();
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -96,7 +99,11 @@ export function AdminHeader() {
           {/* Right side */}
           <div className="hidden md:flex md:items-center md:space-x-4">
             {/* Notifications */}
-            <button className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition">
+            <button
+              onClick={() => setNotificationPanelOpen(true)}
+              className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+              title="Notifications"
+            >
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
@@ -155,7 +162,7 @@ export function AdminHeader() {
 
             {/* Notifications Mobile */}
             <button
-              onClick={() => router.push('/notifications')}
+              onClick={() => setNotificationPanelOpen(true)}
               className="relative p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
               title="Notifications"
             >
@@ -174,6 +181,12 @@ export function AdminHeader() {
           </div>
         </div>
       </nav>
+
+      {/* Notification Panel */}
+      <AdminNotificationPanel
+        isOpen={notificationPanelOpen}
+        onClose={() => setNotificationPanelOpen(false)}
+      />
     </header>
   );
 }

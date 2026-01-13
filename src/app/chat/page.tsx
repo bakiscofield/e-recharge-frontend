@@ -110,6 +110,19 @@ export default function ChatPage() {
       loadConversation();
     });
 
+    newSocket.on('conversation_closed', () => {
+      toast('Cette conversation a été fermée par le support', { icon: 'ℹ️' });
+      // Réinitialiser pour créer une nouvelle conversation
+      setConversation(null);
+      setMessages([]);
+      // Recharger pour créer une nouvelle conversation
+      setTimeout(() => loadConversation(), 1000);
+    });
+
+    newSocket.on('message_error', (data) => {
+      toast.error(data.error || 'Erreur lors de l\'envoi du message');
+    });
+
     setSocket(newSocket);
 
     return () => {
@@ -132,7 +145,12 @@ export default function ChatPage() {
         try {
           const createResponse = await api.post('/chat/conversations');
           setConversation(createResponse.data);
-          setMessages([]);
+          // Charger les messages de la conversation (au cas où elle existait déjà)
+          if (createResponse.data?.id) {
+            loadMessages(createResponse.data.id);
+          } else {
+            setMessages([]);
+          }
         } catch (createError) {
           console.error('Error creating conversation:', createError);
           toast.error('Erreur lors de la création de la conversation');

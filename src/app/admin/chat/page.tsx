@@ -14,7 +14,8 @@ import {
   Search,
   Paperclip,
   Check,
-  CheckCheck
+  CheckCheck,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import io, { Socket } from 'socket.io-client';
@@ -105,6 +106,19 @@ export default function AdminChatPage() {
       loadConversations();
     });
 
+    newSocket.on('conversation_closed', (data) => {
+      toast('Cette conversation a été fermée', { icon: 'ℹ️' });
+      if (selectedConversation?.id === data.conversationId) {
+        setSelectedConversation(null);
+        setMessages([]);
+      }
+      loadConversations();
+    });
+
+    newSocket.on('message_error', (data) => {
+      toast.error(data.error || 'Erreur lors de l\'envoi du message');
+    });
+
     setSocket(newSocket);
 
     return () => {
@@ -192,6 +206,31 @@ export default function AdminChatPage() {
       toast.error('Erreur lors de l\'envoi du message');
     } finally {
       setSending(false);
+    }
+  };
+
+  // Fermer une conversation
+  const closeConversation = async () => {
+    if (!selectedConversation || !user) return;
+
+    if (!confirm('Voulez-vous vraiment fermer cette conversation ? Le client devra créer une nouvelle conversation.')) {
+      return;
+    }
+
+    try {
+      if (socket) {
+        socket.emit('close_conversation', {
+          conversationId: selectedConversation.id,
+          userId: user.id,
+        });
+        toast.success('Conversation fermée avec succès');
+        setSelectedConversation(null);
+        setMessages([]);
+        loadConversations();
+      }
+    } catch (error) {
+      console.error('Error closing conversation:', error);
+      toast.error('Erreur lors de la fermeture de la conversation');
     }
   };
 
@@ -315,18 +354,31 @@ export default function AdminChatPage() {
             <>
               {/* Header conversation */}
               <div className="bg-white border-b border-gray-200 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-white font-bold">
-                    {selectedConversation.client.firstName[0]}
-                    {selectedConversation.client.lastName[0]}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-white font-bold">
+                      {selectedConversation.client.firstName[0]}
+                      {selectedConversation.client.lastName[0]}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">
+                        {selectedConversation.client.firstName}{' '}
+                        {selectedConversation.client.lastName}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {selectedConversation.agent
+                          ? `Assigné à ${selectedConversation.agent.firstName}`
+                          : 'Non assigné'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900">
-                      {selectedConversation.client.firstName}{' '}
-                      {selectedConversation.client.lastName}
-                    </h3>
-                    <p className="text-sm text-gray-500">Client</p>
-                  </div>
+                  <button
+                    onClick={closeConversation}
+                    className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                    title="Fermer la conversation"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
 

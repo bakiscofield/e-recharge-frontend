@@ -7,7 +7,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 console.log('[SW] ✅ Firebase scripts loaded');
 
-const CACHE_VERSION = 'v2.0.0';
+const CACHE_VERSION = 'v2.0.1';
 const CACHE_NAMES = {
   static: `alicebot-static-${CACHE_VERSION}`,
   dynamic: `alicebot-dynamic-${CACHE_VERSION}`,
@@ -33,7 +33,6 @@ const MAX_CACHE_SIZE = {
 
 // URLs à pré-cacher (essentielles)
 const PRECACHE_URLS = [
-  '/offline.html',
   '/manifest.json'
 ];
 
@@ -237,9 +236,6 @@ async function cacheFirst(request, cacheName, maxAge) {
     return networkResponse;
   } catch (error) {
     console.log('[SW] Network failed, trying cache:', error.message);
-    if (request.destination === 'document') {
-      return cache.match('/offline.html');
-    }
     if (cachedResponse) {
       return cachedResponse;
     }
@@ -276,10 +272,6 @@ async function networkFirst(request, cacheName, maxAge, timeout = 3000) {
       return cachedResponse;
     }
 
-    if (request.destination === 'document') {
-      return cache.match('/offline.html');
-    }
-
     throw error;
   }
 }
@@ -309,10 +301,6 @@ async function networkOnly(request) {
     return await fetch(request);
   } catch (error) {
     console.error('[SW] Network only request failed:', error);
-    if (request.destination === 'document') {
-      const cache = await caches.open(CACHE_NAMES.static);
-      return cache.match('/offline.html');
-    }
     return new Response('Network error', {
       status: 503,
       statusText: 'Service Unavailable'
@@ -381,11 +369,6 @@ self.addEventListener('fetch', (event) => {
 
       } catch (error) {
         console.error('[SW] Erreur fetch:', error);
-
-        if (request.destination === 'document' || request.mode === 'navigate') {
-          const cache = await caches.open(CACHE_NAMES.static);
-          return cache.match('/offline.html');
-        }
 
         return new Response('Service Worker: Erreur réseau', {
           status: 503,

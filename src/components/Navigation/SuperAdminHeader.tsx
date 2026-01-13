@@ -24,6 +24,7 @@ import {
   Mail
 } from 'lucide-react';
 import { useAppConfig } from '@/hooks/useAppConfig';
+import { AdminNotificationPanel } from '@/components/Notifications/AdminNotificationPanel';
 
 export function SuperAdminHeader() {
   const router = useRouter();
@@ -34,6 +35,7 @@ export function SuperAdminHeader() {
   const { appName, appLogo } = useAppConfig();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
 
   const navigation = [
     { name: 'Dashboard', href: '/super-admin', icon: LayoutDashboard },
@@ -42,6 +44,7 @@ export function SuperAdminHeader() {
     { name: 'Bookmakers', href: '/super-admin/bookmakers', icon: Gamepad2 },
     { name: 'Configuration', href: '/super-admin/configuration', icon: Settings },
     { name: 'Parrainage', href: '/super-admin/configuration-parrainage', icon: Gift },
+    { name: 'Retraits Promo', href: '/super-admin/referral-withdrawals', icon: Gift },
     { name: 'Newsletters', href: '/super-admin/newsletters', icon: Mail },
     { name: 'Thème', href: '/super-admin/theme-configurator', icon: Palette },
     { name: 'Annonces', href: '/super-admin/annonces', icon: Megaphone },
@@ -175,7 +178,11 @@ export function SuperAdminHeader() {
           {/* Right side - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-2 lg:gap-3 flex-shrink-0">
             {/* Notifications */}
-            <button className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition">
+            <button
+              onClick={() => setNotificationPanelOpen(true)}
+              className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+              title="Notifications"
+            >
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
@@ -274,6 +281,12 @@ export function SuperAdminHeader() {
           </div>
         )}
       </nav>
+
+      {/* Notification Panel */}
+      <AdminNotificationPanel
+        isOpen={notificationPanelOpen}
+        onClose={() => setNotificationPanelOpen(false)}
+      />
     </header>
   );
 }

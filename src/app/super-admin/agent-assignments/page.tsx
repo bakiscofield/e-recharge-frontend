@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SuperAdminLayout } from '@/components/Layout/SuperAdminLayout';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, Power, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Power, X, Search, ChevronDown, User } from 'lucide-react';
 
 interface Agent {
   id: string;
@@ -51,6 +51,11 @@ export default function AgentAssignmentsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<AgentAssignment | null>(null);
 
+  // États pour le select moderne d'agents
+  const [showAgentDropdown, setShowAgentDropdown] = useState(false);
+  const [agentSearchQuery, setAgentSearchQuery] = useState('');
+  const agentDropdownRef = useRef<HTMLDivElement>(null);
+
   const [formData, setFormData] = useState({
     agentId: '',
     bookmakerId: '',
@@ -70,6 +75,28 @@ export default function AgentAssignmentsPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Fermer le dropdown d'agents quand on clique en dehors
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (agentDropdownRef.current && !agentDropdownRef.current.contains(event.target as Node)) {
+        setShowAgentDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filtrer les agents selon la recherche
+  const filteredAgents = agents.filter((agent) =>
+    `${agent.firstName} ${agent.lastName} ${agent.phone}`
+      .toLowerCase()
+      .includes(agentSearchQuery.toLowerCase())
+  );
+
+  // Obtenir l'agent sélectionné
+  const selectedAgent = agents.find((a) => a.id === formData.agentId);
 
   const loadData = async () => {
     try {
@@ -273,16 +300,6 @@ export default function AgentAssignmentsPage() {
                           {assignment.employee.firstName} {assignment.employee.lastName}
                         </div>
                         <div className="text-sm text-gray-600">{assignment.employee.phone}</div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              assignment.employee.isOnline ? 'bg-green-500' : 'bg-gray-500'
-                            }`}
-                          ></div>
-                          <span className="text-xs text-gray-600">
-                            {assignment.employee.isOnline ? 'En ligne' : 'Hors ligne'}
-                          </span>
-                        </div>
                       </div>
 
                       {/* Bookmaker & Paiement */}
@@ -387,25 +404,100 @@ export default function AgentAssignmentsPage() {
             </div>
 
             <div className="space-y-4">
-              {/* Agent */}
+              {/* Agent - Select moderne */}
               {!editingAssignment && (
-                <div>
+                <div ref={agentDropdownRef} className="relative">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Agent
+                    Agent <span className="text-red-400">*</span>
                   </label>
-                  <select
-                    value={formData.agentId}
-                    onChange={(e) => setFormData({ ...formData, agentId: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#0a0a1f] border border-purple-500/30 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    required
+                  <button
+                    type="button"
+                    onClick={() => setShowAgentDropdown(!showAgentDropdown)}
+                    className="w-full px-4 py-3 bg-[#0a0a1f] border border-purple-500/30 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent flex items-center justify-between hover:bg-[#0f0f2f] transition"
                   >
-                    <option value="">Sélectionnez un agent</option>
-                    {agents.map((agent) => (
-                      <option key={agent.id} value={agent.id}>
-                        {agent.firstName} {agent.lastName} - {agent.phone}
-                      </option>
-                    ))}
-                  </select>
+                    <div className="flex items-center gap-3">
+                      {selectedAgent ? (
+                        <>
+                          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            {selectedAgent.firstName[0]}{selectedAgent.lastName[0]}
+                          </div>
+                          <div className="text-left">
+                            <div className="font-medium">
+                              {selectedAgent.firstName} {selectedAgent.lastName}
+                            </div>
+                            <div className="text-xs text-gray-400">{selectedAgent.phone}</div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <User className="h-5 w-5 text-gray-400" />
+                          <span className="text-gray-400">Sélectionnez un agent</span>
+                        </>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${showAgentDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Dropdown */}
+                  <AnimatePresence>
+                    {showAgentDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-50 w-full mt-2 bg-[#0a0a1f] border border-purple-500/30 rounded-lg shadow-xl overflow-hidden"
+                      >
+                        {/* Barre de recherche */}
+                        <div className="p-3 border-b border-purple-500/30">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <input
+                              type="text"
+                              value={agentSearchQuery}
+                              onChange={(e) => setAgentSearchQuery(e.target.value)}
+                              placeholder="Rechercher un agent..."
+                              className="w-full pl-10 pr-4 py-2 bg-[#1a1a3f] border border-purple-500/20 rounded-lg text-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Liste des agents */}
+                        <div className="max-h-60 overflow-y-auto">
+                          {filteredAgents.length === 0 ? (
+                            <div className="p-4 text-center text-gray-400 text-sm">
+                              Aucun agent trouvé
+                            </div>
+                          ) : (
+                            filteredAgents.map((agent) => (
+                              <button
+                                key={agent.id}
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, agentId: agent.id });
+                                  setShowAgentDropdown(false);
+                                  setAgentSearchQuery('');
+                                }}
+                                className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-purple-500/10 transition ${
+                                  formData.agentId === agent.id ? 'bg-purple-500/20' : ''
+                                }`}
+                              >
+                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                                  {agent.firstName[0]}{agent.lastName[0]}
+                                </div>
+                                <div className="text-left flex-1">
+                                  <div className="font-medium text-white">
+                                    {agent.firstName} {agent.lastName}
+                                  </div>
+                                  <div className="text-xs text-gray-400">{agent.phone}</div>
+                                </div>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
 

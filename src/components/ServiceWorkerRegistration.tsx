@@ -18,14 +18,6 @@ export function ServiceWorkerRegistration() {
 
         console.log('[SW] Service Worker registered:', registration);
 
-        // Notification de succès (uniquement en dev)
-        if (process.env.NODE_ENV === 'development') {
-          toast.success('Service Worker activé', {
-            icon: '⚙️',
-            duration: 3000,
-          });
-        }
-
         // Vérifier les mises à jour
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
@@ -120,26 +112,14 @@ export function ServiceWorkerRegistration() {
   // Gestion de la connexion/déconnexion
   useEffect(() => {
     const handleOnline = () => {
-      toast.success('Connexion rétablie', {
-        icon: '🌐',
-        duration: 3000,
-      });
-
-      // Déclencher la synchronisation des données
+      // Déclencher la synchronisation des données silencieusement
       PWAUtils.requestBackgroundSync('sync-data').catch(console.error);
     };
 
     const handleOffline = () => {
-      toast.error('Vous êtes hors ligne', {
-        icon: '📡',
-        duration: Infinity,
-      });
+      // Pas de notification pour éviter les messages répétitifs
+      console.log('[PWA] Mode hors ligne activé');
     };
-
-    // Vérifier l'état initial
-    if (typeof window !== 'undefined' && !navigator.onLine) {
-      handleOffline();
-    }
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
