@@ -94,14 +94,14 @@ export function ImageUpload({
 
   return (
     <div className={className}>
-      <label className="block text-sm font-medium text-gray-300 mb-2">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
         {label}
       </label>
 
       {value ? (
         <div className="relative group">
           <div
-            className="bg-gray-900/50 rounded-lg border border-gray-700 p-4 flex items-center justify-center"
+            className="bg-gray-50 rounded-lg border border-gray-200 p-4 flex items-center justify-center"
             style={aspectRatio ? { aspectRatio } : { minHeight: '200px' }}
           >
             <img
@@ -128,7 +128,7 @@ export function ImageUpload({
             ${
               isDragging
                 ? 'border-cyan-500 bg-cyan-500/10'
-                : 'border-gray-700 hover:border-gray-600'
+                : 'border-gray-300 hover:border-gray-400 bg-gray-50'
             }
             ${isUploading ? 'opacity-50 pointer-events-none' : ''}
           `}
@@ -136,7 +136,7 @@ export function ImageUpload({
           {isUploading ? (
             <div className="flex flex-col items-center gap-2">
               <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-gray-400">Upload en cours...</p>
+              <p className="text-gray-600">Upload en cours...</p>
             </div>
           ) : (
             <>
@@ -144,10 +144,10 @@ export function ImageUpload({
                 {isDragging ? (
                   <ImageIcon className="w-12 h-12 text-cyan-500" />
                 ) : (
-                  <Upload className="w-12 h-12 text-gray-500" />
+                  <Upload className="w-12 h-12 text-gray-400" />
                 )}
               </div>
-              <p className="text-gray-400 mb-1">
+              <p className="text-gray-700 mb-1">
                 Glissez-déposez une image ici ou cliquez pour sélectionner
               </p>
               <p className="text-xs text-gray-500">
