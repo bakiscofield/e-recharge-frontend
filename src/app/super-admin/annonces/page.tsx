@@ -13,7 +13,8 @@ import {
   FileText,
   Eye,
   Trash2,
-  Plus
+  Plus,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -22,7 +23,7 @@ interface Announcement {
   title: string;
   fileUrl: string;
   fileType: 'IMAGE' | 'PDF';
-  displayType: 'ONCE' | 'DAILY';
+  displayType: 'ONCE' | 'DAILY' | 'EVERY_LOGIN';
   isActive: boolean;
   createdAt: string;
   expiresAt?: string;
@@ -38,7 +39,7 @@ export default function AnnouncementsPage() {
   const [formData, setFormData] = useState({
     title: '',
     file: null as File | null,
-    displayType: 'DAILY' as 'ONCE' | 'DAILY',
+    displayType: 'DAILY' as 'ONCE' | 'DAILY' | 'EVERY_LOGIN',
   });
 
   useEffect(() => {
@@ -225,34 +226,48 @@ export default function AnnouncementsPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Type d'affichage
                       </label>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-3 gap-3">
                         <button
                           type="button"
                           onClick={() => setFormData({ ...formData, displayType: 'ONCE' })}
-                          className={`p-4 border-2 rounded-lg transition ${
+                          className={`p-3 border-2 rounded-lg transition ${
                             formData.displayType === 'ONCE'
                               ? 'border-primary bg-primary/5'
                               : 'border-gray-300 hover:border-gray-400'
                           }`}
                           disabled={uploading}
                         >
-                          <Calendar className="h-6 w-6 mx-auto mb-2 text-primary" />
-                          <div className="font-medium">Une seule fois</div>
-                          <div className="text-xs text-gray-600">Aujourd'hui uniquement</div>
+                          <Calendar className="h-5 w-5 mx-auto mb-1 text-primary" />
+                          <div className="font-medium text-sm">Une fois</div>
+                          <div className="text-xs text-gray-600">Aujourd'hui</div>
                         </button>
                         <button
                           type="button"
                           onClick={() => setFormData({ ...formData, displayType: 'DAILY' })}
-                          className={`p-4 border-2 rounded-lg transition ${
+                          className={`p-3 border-2 rounded-lg transition ${
                             formData.displayType === 'DAILY'
                               ? 'border-primary bg-primary/5'
                               : 'border-gray-300 hover:border-gray-400'
                           }`}
                           disabled={uploading}
                         >
-                          <Calendar className="h-6 w-6 mx-auto mb-2 text-primary" />
-                          <div className="font-medium">Quotidien</div>
-                          <div className="text-xs text-gray-600">Chaque jour</div>
+                          <Calendar className="h-5 w-5 mx-auto mb-1 text-primary" />
+                          <div className="font-medium text-sm">Quotidien</div>
+                          <div className="text-xs text-gray-600">1x par jour</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, displayType: 'EVERY_LOGIN' })}
+                          className={`p-3 border-2 rounded-lg transition ${
+                            formData.displayType === 'EVERY_LOGIN'
+                              ? 'border-primary bg-primary/5'
+                              : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                          disabled={uploading}
+                        >
+                          <RefreshCw className="h-5 w-5 mx-auto mb-1 text-primary" />
+                          <div className="font-medium text-sm">Connexion</div>
+                          <div className="text-xs text-gray-600">À chaque visite</div>
                         </button>
                       </div>
                     </div>
@@ -400,9 +415,17 @@ export default function AnnouncementsPage() {
                   <h3 className="font-semibold text-gray-900 mb-2">{announcement.title}</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-gray-400" />
+                      {announcement.displayType === 'EVERY_LOGIN' ? (
+                        <RefreshCw className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Calendar className="h-4 w-4 text-gray-400" />
+                      )}
                       <span className="text-gray-600">
-                        {announcement.displayType === 'ONCE' ? 'Une fois' : 'Quotidien'}
+                        {announcement.displayType === 'ONCE'
+                          ? 'Une fois'
+                          : announcement.displayType === 'DAILY'
+                            ? 'Quotidien'
+                            : 'À chaque connexion'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">

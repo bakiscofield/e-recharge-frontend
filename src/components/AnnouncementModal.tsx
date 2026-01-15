@@ -10,7 +10,7 @@ interface Announcement {
   title: string;
   fileUrl: string;
   fileType: 'IMAGE' | 'PDF';
-  displayType: 'ONCE' | 'DAILY';
+  displayType: 'ONCE' | 'DAILY' | 'EVERY_LOGIN';
   isActive: boolean;
   createdAt: string;
 }
@@ -56,7 +56,22 @@ export function AnnouncementModal() {
   const checkShouldShowAnnouncement = (announcement: Announcement): boolean => {
     const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
     const storageKey = `announcement_shown_${announcement.id}`;
+    const sessionKey = `announcement_session_${announcement.id}`;
     const lastShown = localStorage.getItem(storageKey);
+
+    // Pour les annonces "EVERY_LOGIN" (à chaque connexion/login)
+    if (announcement.displayType === 'EVERY_LOGIN') {
+      // Récupérer le token actuel (identifie la session de connexion)
+      const currentToken = localStorage.getItem('token');
+      if (!currentToken) return false;
+
+      // Vérifier si déjà affichée pour ce token de connexion
+      const shownForToken = localStorage.getItem(sessionKey);
+      if (shownForToken === currentToken) {
+        return false;
+      }
+      return true;
+    }
 
     // Pour les annonces "ONCE" (une seule fois)
     if (announcement.displayType === 'ONCE') {
@@ -92,9 +107,18 @@ export function AnnouncementModal() {
     if (announcement) {
       const today = new Date().toISOString().split('T')[0];
       const storageKey = `announcement_shown_${announcement.id}`;
+      const sessionKey = `announcement_session_${announcement.id}`;
 
-      // Marquer comme affichée aujourd'hui
-      localStorage.setItem(storageKey, today);
+      // Pour EVERY_LOGIN, sauvegarder le token actuel (se réaffiche si nouveau login)
+      if (announcement.displayType === 'EVERY_LOGIN') {
+        const currentToken = localStorage.getItem('token');
+        if (currentToken) {
+          localStorage.setItem(sessionKey, currentToken);
+        }
+      } else {
+        // Pour ONCE et DAILY, marquer dans localStorage avec la date
+        localStorage.setItem(storageKey, today);
+      }
     }
 
     setShowModal(false);

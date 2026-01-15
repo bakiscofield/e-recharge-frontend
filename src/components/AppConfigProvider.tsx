@@ -1,12 +1,50 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 
-export function AppConfigProvider({ children }: { children: React.ReactNode }) {
-  const { config } = useSelector((state: RootState) => state.config);
+// Loader component avec animation
+function AppLoader() {
+  const [dots, setDots] = useState('');
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prev) => (prev.length >= 3 ? '' : prev + '.'));
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="app-loader-container">
+      <div className="app-loader-content">
+        <div className="app-loader-spinner">
+          <div className="spinner-ring"></div>
+          <div className="spinner-ring"></div>
+          <div className="spinner-ring"></div>
+        </div>
+        <p className="app-loader-text">Chargement{dots}</p>
+      </div>
+    </div>
+  );
+}
+
+export function AppConfigProvider({ children }: { children: React.ReactNode }) {
+  const { config, isLoading, isInitialized } = useSelector((state: RootState) => state.config);
+  const [showLoader, setShowLoader] = useState(true);
+
+  // Gérer le masquage du loader quand la config est prête
+  useEffect(() => {
+    if (isInitialized && !isLoading) {
+      // Petit délai pour une transition fluide
+      const timer = setTimeout(() => {
+        setShowLoader(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isInitialized, isLoading]);
+
+  // Appliquer la configuration
   useEffect(() => {
     if (!config || Object.keys(config).length === 0) return;
 
@@ -53,6 +91,11 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
 
     console.log('✅ Configuration appliquée avec succès');
   }, [config]);
+
+  // Afficher le loader pendant le chargement initial
+  if (showLoader) {
+    return <AppLoader />;
+  }
 
   return <>{children}</>;
 }
