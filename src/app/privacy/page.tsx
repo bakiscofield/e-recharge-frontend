@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - AliceBot',
-  description: 'Privacy Policy and Data Protection for AliceBot PWA',
+  title: 'Politique de Confidentialité',
+  description: 'Politique de confidentialité et protection des données',
 };
 
 export default function PrivacyPage() {
@@ -10,11 +10,11 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          Privacy Policy
+          Politique de Confidentialité
         </h1>
 
         <p className="text-sm text-gray-600 mb-8">
-          Last updated: {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+          Dernière mise à jour : {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
 
         <div className="space-y-6 text-gray-700">
@@ -23,203 +23,205 @@ export default function PrivacyPage() {
               1. Introduction
             </h2>
             <p className="leading-relaxed">
-              AliceBot ("we", "our", or "us") is committed to protecting your privacy.
-              This Privacy Policy explains how we collect, use, and safeguard your information
-              when you use our Progressive Web Application (PWA).
+              Nous nous engageons à protéger votre vie privée. Cette Politique de
+              Confidentialité explique comment nous collectons, utilisons et protégeons
+              vos informations lorsque vous utilisez notre Application Web Progressive (PWA).
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              2. Information We Collect
+              2. Informations que nous collectons
             </h2>
             <div className="space-y-2">
-              <h3 className="font-medium text-gray-800">2.1 Personal Information</h3>
+              <h3 className="font-medium text-gray-800">2.1 Informations personnelles</h3>
               <p className="leading-relaxed">
-                We collect information that you provide directly to us, including:
+                Nous collectons les informations que vous nous fournissez directement, notamment :
               </p>
               <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>Email address and username for account creation</li>
-                <li>Transaction history (deposits and withdrawals)</li>
-                <li>Bookmaker account information</li>
-                <li>Profile preferences and settings</li>
+                <li>Adresse e-mail et numéro de téléphone pour la création de compte</li>
+                <li>Historique des transactions (dépôts et retraits)</li>
+                <li>Informations de compte bookmaker</li>
+                <li>Préférences de profil et paramètres</li>
               </ul>
 
-              <h3 className="font-medium text-gray-800 mt-4">2.2 Automatically Collected Information</h3>
+              <h3 className="font-medium text-gray-800 mt-4">2.2 Informations collectées automatiquement</h3>
               <p className="leading-relaxed">
-                When you use AliceBot, we automatically collect:
+                Lorsque vous utilisez notre application, nous collectons automatiquement :
               </p>
               <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>Device information (browser type, operating system)</li>
-                <li>Usage data (features used, time spent)</li>
-                <li>Log data (IP address, access times)</li>
+                <li>Informations sur l&apos;appareil (type de navigateur, système d&apos;exploitation)</li>
+                <li>Données d&apos;utilisation (fonctionnalités utilisées, temps passé)</li>
+                <li>Données de journal (adresse IP, heures d&apos;accès)</li>
               </ul>
 
-              <h3 className="font-medium text-gray-800 mt-4">2.3 Local Storage</h3>
+              <h3 className="font-medium text-gray-800 mt-4">2.3 Stockage local</h3>
               <p className="leading-relaxed">
-                Our PWA uses browser local storage and IndexedDB to:
+                Notre PWA utilise le stockage local du navigateur et IndexedDB pour :
               </p>
               <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>Enable offline functionality</li>
-                <li>Cache data for faster performance</li>
-                <li>Store user preferences</li>
+                <li>Permettre les fonctionnalités hors ligne</li>
+                <li>Mettre en cache les données pour de meilleures performances</li>
+                <li>Stocker les préférences utilisateur</li>
               </ul>
             </div>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              3. How We Use Your Information
+              3. Comment nous utilisons vos informations
             </h2>
             <p className="leading-relaxed mb-2">
-              We use the collected information for:
+              Nous utilisons les informations collectées pour :
             </p>
             <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>Providing and maintaining the AliceBot service</li>
-              <li>Processing your transactions and managing your account</li>
-              <li>Sending important notifications and updates</li>
-              <li>Improving our application and user experience</li>
-              <li>Analyzing usage patterns to enhance features</li>
-              <li>Ensuring security and preventing fraud</li>
+              <li>Fournir et maintenir notre service</li>
+              <li>Traiter vos transactions et gérer votre compte</li>
+              <li>Envoyer des notifications et mises à jour importantes</li>
+              <li>Améliorer notre application et l&apos;expérience utilisateur</li>
+              <li>Analyser les tendances d&apos;utilisation pour améliorer les fonctionnalités</li>
+              <li>Assurer la sécurité et prévenir la fraude</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              4. Data Storage and Security
+              4. Stockage et sécurité des données
             </h2>
             <p className="leading-relaxed">
-              We implement industry-standard security measures to protect your data:
+              Nous mettons en œuvre des mesures de sécurité conformes aux normes de l&apos;industrie pour protéger vos données :
             </p>
             <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>All data transmission is encrypted using HTTPS/TLS</li>
-              <li>Passwords are hashed using secure algorithms</li>
-              <li>Regular security audits and updates</li>
-              <li>Restricted access to personal information</li>
+              <li>Toutes les transmissions de données sont cryptées via HTTPS/TLS</li>
+              <li>Les mots de passe sont hachés à l&apos;aide d&apos;algorithmes sécurisés</li>
+              <li>Audits de sécurité réguliers et mises à jour</li>
+              <li>Accès restreint aux informations personnelles</li>
             </ul>
             <p className="leading-relaxed mt-3">
-              <strong>Data Location:</strong> Your data is stored on secure servers
-              and may be backed up locally on your device for offline access.
+              <strong>Emplacement des données :</strong> Vos données sont stockées sur des serveurs
+              sécurisés et peuvent être sauvegardées localement sur votre appareil pour un accès hors ligne.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              5. Data Sharing and Disclosure
+              5. Partage et divulgation des données
             </h2>
             <p className="leading-relaxed mb-2">
-              We do not sell, trade, or rent your personal information. We may share
-              your information only in the following circumstances:
+              Nous ne vendons, n&apos;échangeons ni ne louons vos informations personnelles.
+              Nous pouvons partager vos informations uniquement dans les circonstances suivantes :
             </p>
             <ul className="list-disc list-inside ml-4 space-y-1">
-              <li><strong>With your consent:</strong> When you explicitly authorize us</li>
-              <li><strong>Legal requirements:</strong> When required by law or legal process</li>
-              <li><strong>Service providers:</strong> With trusted partners who help operate our service (under strict confidentiality agreements)</li>
-              <li><strong>Business transfers:</strong> In the event of a merger or acquisition</li>
+              <li><strong>Avec votre consentement :</strong> Lorsque vous nous autorisez explicitement</li>
+              <li><strong>Exigences légales :</strong> Lorsque la loi ou une procédure judiciaire l&apos;exige</li>
+              <li><strong>Prestataires de services :</strong> Avec des partenaires de confiance qui aident à exploiter notre service (sous accord de confidentialité strict)</li>
+              <li><strong>Transferts d&apos;entreprise :</strong> En cas de fusion ou d&apos;acquisition</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              6. Your Rights and Choices
+              6. Vos droits et choix
             </h2>
             <p className="leading-relaxed mb-2">
-              You have the following rights regarding your data:
+              Vous disposez des droits suivants concernant vos données :
             </p>
             <ul className="list-disc list-inside ml-4 space-y-1">
-              <li><strong>Access:</strong> Request a copy of your personal data</li>
-              <li><strong>Correction:</strong> Update or correct inaccurate information</li>
-              <li><strong>Deletion:</strong> Request deletion of your account and data</li>
-              <li><strong>Export:</strong> Download your data in a portable format</li>
-              <li><strong>Opt-out:</strong> Unsubscribe from notifications</li>
+              <li><strong>Accès :</strong> Demander une copie de vos données personnelles</li>
+              <li><strong>Rectification :</strong> Mettre à jour ou corriger les informations inexactes</li>
+              <li><strong>Suppression :</strong> Demander la suppression de votre compte et de vos données</li>
+              <li><strong>Exportation :</strong> Télécharger vos données dans un format portable</li>
+              <li><strong>Désinscription :</strong> Se désabonner des notifications</li>
             </ul>
             <p className="leading-relaxed mt-3">
-              To exercise these rights, contact us at: <a href="mailto:support@alicebot.online" className="text-blue-600 hover:underline">support@alicebot.online</a>
+              Pour exercer ces droits, contactez-nous via notre support.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              7. Cookies and Tracking
+              7. Cookies et suivi
             </h2>
             <p className="leading-relaxed">
-              AliceBot uses:
+              Notre application utilise :
             </p>
             <ul className="list-disc list-inside ml-4 space-y-1">
-              <li><strong>Essential cookies:</strong> Required for authentication and basic functionality</li>
-              <li><strong>Service Worker:</strong> Enables offline functionality and caching</li>
-              <li><strong>Local Storage:</strong> Stores preferences and cached data</li>
+              <li><strong>Cookies essentiels :</strong> Requis pour l&apos;authentification et les fonctionnalités de base</li>
+              <li><strong>Service Worker :</strong> Permet les fonctionnalités hors ligne et la mise en cache</li>
+              <li><strong>Stockage local :</strong> Stocke les préférences et les données en cache</li>
             </ul>
             <p className="leading-relaxed mt-3">
-              We do not use third-party tracking cookies or analytics without your consent.
+              Nous n&apos;utilisons pas de cookies de suivi tiers ni d&apos;analyses sans votre consentement.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              8. Children's Privacy
+              8. Protection des mineurs
             </h2>
             <p className="leading-relaxed">
-              AliceBot is not intended for users under 18 years of age. We do not
-              knowingly collect personal information from children. If you believe we
-              have collected information from a minor, please contact us immediately.
+              Notre application n&apos;est pas destinée aux utilisateurs de moins de 18 ans.
+              Nous ne collectons pas sciemment d&apos;informations personnelles auprès de mineurs.
+              Si vous pensez que nous avons collecté des informations d&apos;un mineur,
+              veuillez nous contacter immédiatement.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              9. International Data Transfers
+              9. Transferts internationaux de données
             </h2>
             <p className="leading-relaxed">
-              Your information may be transferred to and processed in countries other
-              than your country of residence. We ensure that such transfers comply with
-              applicable data protection laws and implement appropriate safeguards.
+              Vos informations peuvent être transférées et traitées dans des pays autres que
+              votre pays de résidence. Nous veillons à ce que ces transferts soient conformes
+              aux lois applicables sur la protection des données et mettons en œuvre les
+              garanties appropriées.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              10. Changes to This Privacy Policy
+              10. Modifications de cette politique
             </h2>
             <p className="leading-relaxed">
-              We may update this Privacy Policy from time to time. We will notify you of
-              significant changes by posting the new policy on this page and updating the
-              "Last updated" date. Your continued use of AliceBot after changes constitutes
-              acceptance of the updated policy.
+              Nous pouvons mettre à jour cette Politique de Confidentialité de temps en temps.
+              Nous vous informerons des changements significatifs en publiant la nouvelle
+              politique sur cette page et en mettant à jour la date de &quot;Dernière mise à jour&quot;.
+              Votre utilisation continue de l&apos;application après les modifications constitue
+              une acceptation de la politique mise à jour.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              11. Contact Us
+              11. Nous contacter
             </h2>
             <p className="leading-relaxed">
-              If you have questions or concerns about this Privacy Policy or our data practices, please contact us:
+              Si vous avez des questions ou des préoccupations concernant cette Politique
+              de Confidentialité ou nos pratiques en matière de données, veuillez nous
+              contacter via notre service support accessible depuis l&apos;application.
             </p>
-            <div className="mt-3 space-y-1">
-              <p><strong>Email:</strong> <a href="mailto:support@alicebot.online" className="text-blue-600 hover:underline">support@alicebot.online</a></p>
-              <p><strong>Website:</strong> <a href="https://front-alice.alicebot.online" className="text-blue-600 hover:underline">https://front-alice.alicebot.online</a></p>
-            </div>
           </section>
 
           <section className="border-t pt-6 mt-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              GDPR Compliance (EU Users)
+              Conformité RGPD (Utilisateurs UE)
             </h2>
             <p className="leading-relaxed mb-2">
-              For users in the European Union, we comply with the General Data Protection
-              Regulation (GDPR). This includes:
+              Pour les utilisateurs de l&apos;Union Européenne, nous nous conformons au
+              Règlement Général sur la Protection des Données (RGPD). Cela inclut :
             </p>
             <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>Legal basis for processing (consent, contract, legitimate interest)</li>
-              <li>Right to data portability</li>
-              <li>Right to be forgotten</li>
-              <li>Right to restrict processing</li>
-              <li>Right to object to processing</li>
-              <li>Notification of data breaches within 72 hours</li>
+              <li>Base légale du traitement (consentement, contrat, intérêt légitime)</li>
+              <li>Droit à la portabilité des données</li>
+              <li>Droit à l&apos;effacement</li>
+              <li>Droit à la limitation du traitement</li>
+              <li>Droit d&apos;opposition au traitement</li>
+              <li>Notification des violations de données dans les 72 heures</li>
             </ul>
             <p className="leading-relaxed mt-3">
-              To file a complaint with a supervisory authority, contact your local data protection authority.
+              Pour déposer une plainte auprès d&apos;une autorité de contrôle, contactez
+              votre autorité locale de protection des données.
             </p>
           </section>
         </div>
@@ -229,7 +231,7 @@ export default function PrivacyPage() {
             href="/"
             className="text-blue-600 hover:text-blue-700 font-medium"
           >
-            ← Back to AliceBot
+            ← Retour à l&apos;accueil
           </a>
         </div>
       </div>
