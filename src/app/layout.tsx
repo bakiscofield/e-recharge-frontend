@@ -10,13 +10,13 @@ import { NotificationPermissionModal } from '@/components/NotificationPermission
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'AliceBot - Dépôts & Retraits Bookmaker',
+  title: 'EMB Money - Dépôts & Retraits Bookmaker',
   description: 'Votre partenaire de confiance pour vos transactions bookmaker. Gérez vos dépôts et retraits en toute sécurité.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'AliceBot',
+    title: 'EMB Money',
   },
   icons: {
     icon: [
@@ -46,7 +46,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#3B82F6',
+  themeColor: '#E63946',
 };
 
 export default function RootLayout({
@@ -58,11 +58,11 @@ export default function RootLayout({
     <html lang="fr">
       <head>
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#3B82F6" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#E63946" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="AliceBot" />
-        <meta name="application-name" content="AliceBot" />
-        <meta name="msapplication-TileColor" content="#3B82F6" />
+        <meta name="apple-mobile-web-app-title" content="EMB Money" />
+        <meta name="application-name" content="EMB Money" />
+        <meta name="msapplication-TileColor" content="#E63946" />
       </head>
       <body className={inter.variable}>
         <Providers>

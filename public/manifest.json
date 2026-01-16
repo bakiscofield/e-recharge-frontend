@@ -1,12 +1,12 @@
 {
-  "name": "AliceBot - Dépôts & Retraits Bookmaker",
-  "short_name": "AliceBot",
-  "description": "Votre partenaire de confiance pour vos transactions bookmaker. Gérez vos dépôts et retraits en toute sécurité.",
+  "name": "EMB Money - Dépôts & Retraits Bookmaker",
+  "short_name": "EMB Money",
+  "description": "Votre application de confiance pour gérer facilement vos transactions sur les plateformes de paris sportifs. Dépôts et retraits via Mobile Money.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3B82F6",
+  "background_color": "#000000",
+  "theme_color": "#E63946",
   "orientation": "portrait-primary",
   "categories": ["finance", "utilities", "business"],
   "lang": "fr",
@@ -70,14 +70,14 @@
       "sizes": "540x720",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Page d'accueil AliceBot"
+      "label": "Page d'accueil EMB Money"
     },
     {
       "src": "/screenshots/desktop-1.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Dashboard AliceBot"
+      "label": "Dashboard EMB Money"
     }
   ],
 

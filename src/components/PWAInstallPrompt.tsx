@@ -69,7 +69,7 @@ export function PWAInstallPrompt() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <Smartphone className="w-5 h-5" />
-                <h3 className="font-semibold text-lg">Installer AliceBot</h3>
+                <h3 className="font-semibold text-lg">Installer EMB Money</h3>
               </div>
               <p className="text-sm text-blue-50 mb-3">
                 Installez l&apos;application sur votre iPhone pour un accès rapide et une meilleure expérience
@@ -109,7 +109,7 @@ export function PWAInstallPrompt() {
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                Installer AliceBot
+                Installer EMB Money
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                 Installez l&apos;application pour un accès rapide et une meilleure expérience, même hors ligne
