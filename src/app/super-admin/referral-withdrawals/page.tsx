@@ -262,7 +262,7 @@ export default function ReferralWithdrawalsPage() {
                         </span>
                       </div>
                       <span className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-sm font-semibold">
-                        {withdrawal.network === 'FLOOZ' ? '📱 Flooz' : '💳 T-Money'}
+                        {withdrawal.network === 'FLOOZ' ? '📱 Flooz' : '💳 Mixx by Yas'}
                       </span>
                     </div>
 

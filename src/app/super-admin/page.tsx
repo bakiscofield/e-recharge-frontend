@@ -19,8 +19,10 @@ interface Statistics {
     total: number;
     pending: number;
     confirmed: number;
-    revenue: number;
-    fees: number;
+    totalDeposits: number;
+    totalWithdrawals: number;
+    depositFees: number;
+    withdrawalFees: number;
   };
   system: {
     bookmakers: number;
@@ -498,15 +500,31 @@ export default function SuperAdminDashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            {/* Revenue Card */}
-            <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-4 sm:p-6 md:p-8 text-white shadow-xl">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">Revenus Total</h3>
-                  <p className="text-sm sm:text-base text-white/90">Commissions générées</p>
+            {/* Deposits and Withdrawals Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {/* Deposits Card */}
+              <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl p-4 sm:p-6 md:p-8 text-white shadow-xl">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">Montant Dépôts</h3>
+                    <p className="text-sm sm:text-base text-white/90">Total des dépôts confirmés</p>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <p className="text-2xl sm:text-3xl font-bold">{(statistics.orders.totalDeposits || 0).toLocaleString()} FCFA</p>
+                  </div>
                 </div>
-                <div className="text-left sm:text-right">
-                  <p className="text-2xl sm:text-3xl font-bold">{statistics.orders.revenue.toLocaleString()} FCFA</p>
+              </div>
+
+              {/* Withdrawals Card */}
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-4 sm:p-6 md:p-8 text-white shadow-xl">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">Montant Retraits</h3>
+                    <p className="text-sm sm:text-base text-white/90">Total des retraits confirmés</p>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <p className="text-2xl sm:text-3xl font-bold">{(statistics.orders.totalWithdrawals || 0).toLocaleString()} FCFA</p>
+                  </div>
                 </div>
               </div>
             </div>

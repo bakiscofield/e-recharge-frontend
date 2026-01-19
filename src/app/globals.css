@@ -98,11 +98,16 @@
 
 * {
   -webkit-tap-highlight-color: transparent;
+  /* Empêcher la sélection de texte non désirée */
+  -webkit-touch-callout: none;
 }
 
 html {
   overscroll-behavior: none;
   overscroll-behavior-y: contain;
+  /* Empêcher le zoom */
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
 }
 
 body {
@@ -112,6 +117,20 @@ body {
   -webkit-overflow-scrolling: touch;
   min-height: 100vh;
   width: 100%;
+  /* Empêcher le zoom par double-tap */
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+}
+
+/* Empêcher le zoom sur les inputs sur iOS (iOS zoome si font-size < 16px) */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Empêcher le zoom par pinch sur toute l'app */
+#__next, main, .app-container {
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
 }
 
 /* Fix pour les selects - forcer le fond blanc */

@@ -20,7 +20,8 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import io, { Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
+import { createSocket } from '@/lib/socket';
 
 interface Message {
   id: string;
@@ -73,13 +74,9 @@ export default function ChatPage() {
   useEffect(() => {
     if (!user) return;
 
-    const newSocket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001', {
-      query: { userId: user.id },
-    });
+    const newSocket = createSocket(user.id);
 
-    newSocket.on('connect', () => {
-      console.log('WebSocket connected');
-    });
+    // Le logging de connexion est déjà géré dans createSocket
 
     newSocket.on('new_message', (message: Message) => {
       console.log('New message received:', message);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/Layout/AppLayout';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
@@ -11,6 +12,7 @@ import { Building2, Wallet, DollarSign, Phone, Key, MapPin, ArrowRight } from 'l
 import { WaitingModal } from '@/components/Modal/WaitingModal';
 
 export default function RetraitPage() {
+  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
 
@@ -220,6 +222,15 @@ export default function RetraitPage() {
                       }`}
                     >
                       <div className="flex flex-col items-center gap-1 sm:gap-2">
+                        {bm.logo ? (
+                          <img
+                            src={bm.logo}
+                            alt={bm.name}
+                            className="h-8 sm:h-10 w-auto object-contain"
+                          />
+                        ) : (
+                          <Building2 className="h-8 sm:h-10 w-8 sm:w-10 text-gray-400" />
+                        )}
                         <div className="font-semibold text-xs sm:text-sm">{bm.name}</div>
                       </div>
                     </button>
@@ -509,7 +520,10 @@ export default function RetraitPage() {
       {/* Waiting Modal */}
       <WaitingModal
         isOpen={showWaitingModal}
-        onClose={() => setShowWaitingModal(false)}
+        onClose={() => {
+          setShowWaitingModal(false);
+          router.push('/historique');
+        }}
         type="RETRAIT"
       />
     </AppLayout>

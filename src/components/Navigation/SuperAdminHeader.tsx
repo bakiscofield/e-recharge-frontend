@@ -21,7 +21,9 @@ import {
   Megaphone,
   Gift,
   Gamepad2,
-  Mail
+  Mail,
+  Info,
+  Ticket,
 } from 'lucide-react';
 import { useAppConfig } from '@/hooks/useAppConfig';
 import { AdminNotificationPanel } from '@/components/Notifications/AdminNotificationPanel';
@@ -47,7 +49,9 @@ export function SuperAdminHeader() {
     { name: 'Retraits Promo', href: '/super-admin/referral-withdrawals', icon: Gift },
     { name: 'Newsletters', href: '/super-admin/newsletters', icon: Mail },
     { name: 'Thème', href: '/super-admin/theme-configurator', icon: Palette },
+    { name: 'Page Info', href: '/super-admin/info-page', icon: Info },
     { name: 'Annonces', href: '/super-admin/annonces', icon: Megaphone },
+    { name: 'Coupons', href: '/super-admin/coupons', icon: Ticket },
     { name: 'Chat', href: '/admin/chat', icon: MessageSquare },
   ];
 

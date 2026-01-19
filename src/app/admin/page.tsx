@@ -13,10 +13,13 @@ import {
   BarChart3,
   Clock,
   TrendingUp,
+  TrendingDown,
   CheckCircle,
   XCircle,
   DollarSign,
   ArrowRight,
+  ArrowDownCircle,
+  ArrowUpCircle,
   Activity
 } from 'lucide-react';
 
@@ -93,7 +96,7 @@ export default function AdminDashboard() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6"
         >
           {/* Pending Orders */}
           <motion.div
@@ -157,22 +160,42 @@ export default function AdminDashboard() {
             </div>
           </motion.div>
 
-          {/* Revenue */}
+          {/* Deposits */}
           <motion.div
             variants={itemVariants}
             className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform" />
             <div className="relative">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <DollarSign className="h-6 w-6 text-purple-600" />
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ArrowDownCircle className="h-6 w-6 text-emerald-600" />
                 </div>
-                <BarChart3 className="h-5 w-5 text-purple-600" />
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
               </div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Revenus</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">Montant Dépôts</p>
               <p className="text-3xl font-bold text-gray-900">
-                {(stats?.totalRevenue || 0).toLocaleString()} FCFA
+                {(stats?.totalDeposits || 0).toLocaleString()} FCFA
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Withdrawals */}
+          <motion.div
+            variants={itemVariants}
+            className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ArrowUpCircle className="h-6 w-6 text-orange-600" />
+                </div>
+                <TrendingDown className="h-5 w-5 text-orange-600" />
+              </div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Montant Retraits</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {(stats?.totalWithdrawals || 0).toLocaleString()} FCFA
               </p>
             </div>
           </motion.div>

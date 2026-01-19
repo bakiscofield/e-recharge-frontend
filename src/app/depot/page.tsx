@@ -1,16 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/Layout/AppLayout';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { createOrder } from '@/store/slices/ordersSlice';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
-import { Globe, Wallet, Building2, Users, DollarSign, Phone, CreditCard, ArrowRight } from 'lucide-react';
+import { Globe, Wallet, Building2, Users, DollarSign, Phone, CreditCard, ArrowRight, Copy, Check } from 'lucide-react';
 import { WaitingModal } from '@/components/Modal/WaitingModal';
 
 export default function DepotPage() {
+  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
 
@@ -21,6 +23,7 @@ export default function DepotPage() {
   const [savedIds, setSavedIds] = useState<any[]>([]);
   const [useNewId, setUseNewId] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const [formData, setFormData] = useState({
     country: user?.country || 'TG',
@@ -222,6 +225,15 @@ export default function DepotPage() {
                       }`}
                     >
                       <div className="flex flex-col items-center gap-1 sm:gap-2">
+                        {bm.logo ? (
+                          <img
+                            src={bm.logo}
+                            alt={bm.name}
+                            className="h-8 sm:h-10 w-auto object-contain"
+                          />
+                        ) : (
+                          <Building2 className="h-8 sm:h-10 w-8 sm:w-10 text-gray-400" />
+                        )}
                         <div className="font-semibold text-xs sm:text-sm">{bm.name}</div>
                       </div>
                     </button>
@@ -367,7 +379,35 @@ export default function DepotPage() {
             </div>
 
             <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
-              <h4 className="font-semibold mb-2 text-sm sm:text-base">Code USSD</h4>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold text-sm sm:text-base">Code USSD</h4>
+                <button
+                  onClick={() => {
+                    const syntaxe = selectedAgent.syntaxe?.replace('{montant}', formData.amount) || '';
+                    navigator.clipboard.writeText(syntaxe);
+                    setCopied(true);
+                    toast.success('Code copié !');
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition ${
+                    copied
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-primary/10 text-primary hover:bg-primary/20'
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copié
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      Copier
+                    </>
+                  )}
+                </button>
+              </div>
               <div className="bg-gray-100 p-3 sm:p-4 rounded-lg font-mono text-base sm:text-lg text-center break-all">
                 {selectedAgent.syntaxe?.replace('{montant}', formData.amount)}
               </div>
@@ -506,7 +546,10 @@ export default function DepotPage() {
       {/* Waiting Modal */}
       <WaitingModal
         isOpen={showWaitingModal}
-        onClose={() => setShowWaitingModal(false)}
+        onClose={() => {
+          setShowWaitingModal(false);
+          router.push('/historique');
+        }}
         type="DEPOT"
       />
     </AppLayout>

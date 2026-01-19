@@ -14,10 +14,13 @@ import {
   Search,
   Paperclip,
   Check,
-  CheckCheck
+  CheckCheck,
+  X,
+  ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import io, { Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
+import { createSocket } from '@/lib/socket';
 
 interface Message {
   id: string;
@@ -63,19 +66,14 @@ export default function SuperAdminChatPage() {
   const [sending, setSending] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialiser WebSocket
   useEffect(() => {
     if (!user) return;
 
-    const newSocket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001', {
-      query: { userId: user.id },
-    });
-
-    newSocket.on('connect', () => {
-      console.log('WebSocket connected');
-    });
+    const newSocket = createSocket(user.id);
 
     newSocket.on('new_message', (message: Message) => {
       if (selectedConversation && message) {
@@ -103,6 +101,20 @@ export default function SuperAdminChatPage() {
       console.log('New client message:', data);
       toast.success(`Nouveau message de ${data.sender.firstName} ${data.sender.lastName}`);
       loadConversations();
+    });
+
+    newSocket.on('conversation_closed', (data) => {
+      toast('Cette conversation a été fermée', { icon: 'ℹ️' });
+      if (selectedConversation?.id === data.conversationId) {
+        setSelectedConversation(null);
+        setMessages([]);
+        setIsMobileModalOpen(false);
+      }
+      loadConversations();
+    });
+
+    newSocket.on('message_error', (data) => {
+      toast.error(data.error || 'Erreur lors de l\'envoi du message');
     });
 
     setSocket(newSocket);
@@ -150,6 +162,13 @@ export default function SuperAdminChatPage() {
   const selectConversation = (conversation: Conversation) => {
     setSelectedConversation(conversation);
     loadMessages(conversation.id);
+    // Ouvrir le modal sur mobile
+    setIsMobileModalOpen(true);
+  };
+
+  // Fermer le modal mobile
+  const closeMobileModal = () => {
+    setIsMobileModalOpen(false);
   };
 
   // Envoyer un message
@@ -195,6 +214,32 @@ export default function SuperAdminChatPage() {
     }
   };
 
+  // Fermer une conversation
+  const closeConversation = async () => {
+    if (!selectedConversation || !user) return;
+
+    if (!confirm('Voulez-vous vraiment fermer cette conversation ? Le client devra créer une nouvelle conversation.')) {
+      return;
+    }
+
+    try {
+      if (socket) {
+        socket.emit('close_conversation', {
+          conversationId: selectedConversation.id,
+          userId: user.id,
+        });
+        toast.success('Conversation fermée avec succès');
+        setSelectedConversation(null);
+        setMessages([]);
+        setIsMobileModalOpen(false);
+        loadConversations();
+      }
+    } catch (error) {
+      console.error('Error closing conversation:', error);
+      toast.error('Erreur lors de la fermeture de la conversation');
+    }
+  };
+
   // Scroll vers le bas
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -205,6 +250,137 @@ export default function SuperAdminChatPage() {
     `${conv.client.firstName} ${conv.client.lastName}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
+  );
+
+  // Composant de zone de messages (réutilisable pour desktop et modal)
+  const MessagesArea = ({ inModal = false }: { inModal?: boolean }) => (
+    <>
+      {/* Header conversation */}
+      <div className="bg-white border-b border-gray-200 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            {inModal && (
+              <button
+                onClick={closeMobileModal}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors mr-1"
+              >
+                <ArrowLeft className="h-5 w-5 text-gray-600" />
+              </button>
+            )}
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-white font-bold">
+              {selectedConversation?.client.firstName[0]}
+              {selectedConversation?.client.lastName[0]}
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900">
+                {selectedConversation?.client.firstName}{' '}
+                {selectedConversation?.client.lastName}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {selectedConversation?.agent
+                  ? `Assigné à ${selectedConversation.agent.firstName}`
+                  : 'Non assigné'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={closeConversation}
+            className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+            title="Fermer la conversation"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <AnimatePresence>
+          {messages.map((message) => {
+            const isMe = message.senderId === user?.id;
+            return (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                    isMe
+                      ? 'bg-primary text-white'
+                      : 'bg-white text-gray-900 border border-gray-200'
+                  }`}
+                >
+                  {!isMe && (
+                    <p className="text-xs font-semibold mb-1 opacity-70">
+                      {message.sender.firstName}
+                    </p>
+                  )}
+                  <p className="whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
+                  <div
+                    className={`flex items-center justify-end gap-1 mt-1 text-xs ${
+                      isMe ? 'text-white/70' : 'text-gray-500'
+                    }`}
+                  >
+                    <span>
+                      {new Date(message.createdAt).toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                    {isMe && (
+                      <>
+                        {message.isRead ? (
+                          <CheckCheck className="h-3 w-3" />
+                        ) : (
+                          <Check className="h-3 w-3" />
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input message */}
+      <div className="bg-white border-t border-gray-200 p-4">
+        <div className="flex items-end gap-2">
+          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <Paperclip className="h-5 w-5 text-gray-500" />
+          </button>
+          <div className="flex-1">
+            <textarea
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
+              placeholder="Écrivez votre message..."
+              rows={1}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+            />
+          </div>
+          <button
+            onClick={sendMessage}
+            disabled={!newMessage.trim() || sending}
+            className="bg-primary hover:bg-primary/90 text-white p-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Send className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    </>
   );
 
   if (loading) {
@@ -309,115 +485,10 @@ export default function SuperAdminChatPage() {
           </div>
         </div>
 
-        {/* Zone de messages */}
-        <div className="flex-1 flex flex-col bg-gray-50">
+        {/* Zone de messages - Desktop uniquement */}
+        <div className="hidden md:flex flex-1 flex-col bg-gray-50">
           {selectedConversation ? (
-            <>
-              {/* Header conversation */}
-              <div className="bg-white border-b border-gray-200 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-white font-bold">
-                    {selectedConversation.client.firstName[0]}
-                    {selectedConversation.client.lastName[0]}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900">
-                      {selectedConversation.client.firstName}{' '}
-                      {selectedConversation.client.lastName}
-                    </h3>
-                    <p className="text-sm text-gray-500">Client</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                <AnimatePresence>
-                  {messages.map((message) => {
-                    const isMe = message.senderId === user?.id;
-                    return (
-                      <motion.div
-                        key={message.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                            isMe
-                              ? 'bg-primary text-white'
-                              : 'bg-white text-gray-900 border border-gray-200'
-                          }`}
-                        >
-                          {!isMe && (
-                            <p className="text-xs font-semibold mb-1 opacity-70">
-                              {message.sender.firstName}
-                            </p>
-                          )}
-                          <p className="whitespace-pre-wrap break-words">
-                            {message.content}
-                          </p>
-                          <div
-                            className={`flex items-center justify-end gap-1 mt-1 text-xs ${
-                              isMe ? 'text-white/70' : 'text-gray-500'
-                            }`}
-                          >
-                            <span>
-                              {new Date(message.createdAt).toLocaleTimeString('fr-FR', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                            {isMe && (
-                              <>
-                                {message.isRead ? (
-                                  <CheckCheck className="h-3 w-3" />
-                                ) : (
-                                  <Check className="h-3 w-3" />
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input message */}
-              <div className="bg-white border-t border-gray-200 p-4">
-                <div className="flex items-end gap-2">
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <Paperclip className="h-5 w-5 text-gray-500" />
-                  </button>
-                  <div className="flex-1">
-                    <textarea
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          sendMessage();
-                        }
-                      }}
-                      placeholder="Écrivez votre message..."
-                      rows={1}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
-                    />
-                  </div>
-                  <button
-                    onClick={sendMessage}
-                    disabled={!newMessage.trim() || sending}
-                    className="bg-primary hover:bg-primary/90 text-white p-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Send className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-            </>
+            <MessagesArea inModal={false} />
           ) : (
             <div className="flex-1 flex items-center justify-center text-gray-400">
               <div className="text-center">
@@ -427,6 +498,30 @@ export default function SuperAdminChatPage() {
             </div>
           )}
         </div>
+
+        {/* Modal Mobile pour les messages */}
+        <AnimatePresence>
+          {isMobileModalOpen && selectedConversation && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="md:hidden fixed inset-0 z-50 bg-black/50"
+              onClick={closeMobileModal}
+            >
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="absolute inset-x-0 bottom-0 top-0 bg-gray-50 flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MessagesArea inModal={true} />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </SuperAdminLayout>
   );

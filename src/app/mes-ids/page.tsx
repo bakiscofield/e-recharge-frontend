@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import AppLayout from '@/components/Layout/AppLayout';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Edit2, CreditCard } from 'lucide-react';
+import { Plus, Trash2, Edit2, CreditCard, Building2 } from 'lucide-react';
 
 export default function MesIDsPage() {
   const [ids, setIds] = useState<any[]>([]);
@@ -183,12 +183,25 @@ export default function MesIDsPage() {
             {ids.map((id) => (
               <div key={id.id} className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{id.bookmaker.name}</h3>
-                    <p className="text-lg font-mono text-primary mt-1">{id.identifier}</p>
-                    {id.label && (
-                      <p className="text-sm text-gray-600 mt-1">{id.label}</p>
+                  <div className="flex items-center gap-3 flex-1">
+                    {id.bookmaker.logo ? (
+                      <img
+                        src={id.bookmaker.logo}
+                        alt={id.bookmaker.name}
+                        className="h-10 w-10 object-contain rounded-lg"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <Building2 className="h-6 w-6 text-gray-400" />
+                      </div>
                     )}
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{id.bookmaker.name}</h3>
+                      <p className="text-lg font-mono text-primary mt-1">{id.identifier}</p>
+                      {id.label && (
+                        <p className="text-sm text-gray-600 mt-1">{id.label}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <button

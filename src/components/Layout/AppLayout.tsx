@@ -20,6 +20,7 @@ import {
   MessageCircle,
   Bell,
   LogOut,
+  Ticket,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -36,6 +37,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { unreadCount: chatUnreadCount } = useSelector((state: RootState) => state.chat);
   const { appName, appLogo } = useAppConfig();
   const [themeConfig, setThemeConfig] = useState<ThemeConfig | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Détecter si on est sur mobile (côté client uniquement)
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -134,10 +146,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
     };
   }, [token]);
 
-  const navItems = [
+  // Navigation items - 3 à gauche, 3 à droite (le coupon sera au centre)
+  const leftNavItems = [
     { icon: ArrowDownCircle, label: 'Dépôt', path: '/depot' },
     { icon: ArrowUpCircle, label: 'Retrait', path: '/retrait' },
     { icon: History, label: 'Historique', path: '/historique' },
+  ];
+
+  const rightNavItems = [
     { icon: Gift, label: 'Parrainage', path: '/parrainage' },
     { icon: CreditCard, label: 'Mes IDs', path: '/mes-ids' },
     { icon: Info, label: 'Infos', path: '/informations' },
@@ -151,7 +167,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
   if (!token) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 relative">
+    <div
+      className="min-h-screen pb-20 relative"
+      style={{ backgroundColor: themeConfig?.backgroundColor || '#f9fafb' }}
+    >
       {/* Arrière-plan dynamique */}
       {themeConfig?.clientBackgroundType === 'image' && themeConfig?.clientBackgroundImage ? (
         <div
@@ -162,7 +181,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             // Sur mobile, on utilise scroll au lieu de fixed pour de meilleures performances
-            backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll',
+            backgroundAttachment: isMobile ? 'scroll' : 'fixed',
           }}
         />
       ) : themeConfig?.particlesEnabled !== false ? (
@@ -225,28 +244,84 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Content */}
       <main className="p-4 relative z-1">{children}</main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-bottom z-20">
-        <div className="grid grid-cols-6 gap-1 px-2 py-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.path;
+      {/* Bottom Navigation avec bouton central flottant */}
+      <nav className="fixed bottom-0 left-0 right-0 safe-bottom z-20">
+        {/* Bouton Coupons central flottant */}
+        <div className="absolute left-1/2 -translate-x-1/2 -top-6 z-30">
+          <button
+            onClick={() => router.push('/coupons')}
+            className={`flex flex-col items-center justify-center w-16 h-16 rounded-full shadow-lg transition-all transform hover:scale-105 ${
+              pathname === '/coupons'
+                ? 'bg-primary text-white shadow-primary/40'
+                : 'bg-gradient-to-br from-primary to-primary/80 text-white shadow-primary/30'
+            }`}
+            style={{
+              boxShadow: pathname === '/coupons'
+                ? '0 8px 25px rgba(var(--color-primary-rgb), 0.5)'
+                : '0 4px 15px rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            <Ticket className="h-7 w-7" strokeWidth={2} />
+            <span className="text-[10px] font-bold mt-0.5">Coupons</span>
+          </button>
+        </div>
 
-            return (
-              <button
-                key={item.path}
-                onClick={() => router.push(item.path)}
-                className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition touch-manipulation ${
-                  isActive
-                    ? 'text-primary bg-primary/10'
-                    : 'text-gray-600 hover:text-primary hover:bg-gray-100'
-                }`}
-              >
-                <Icon className="h-5 w-5 mb-1" strokeWidth={isActive ? 2.5 : 2} />
-                <span className="text-xs font-medium">{item.label}</span>
-              </button>
-            );
-          })}
+        {/* Barre de navigation courbée */}
+        <div className="bg-white border-t border-gray-200 pt-2 pb-2 px-2">
+          <div className="flex items-end justify-between">
+            {/* Items de gauche */}
+            <div className="flex-1 flex justify-around">
+              {leftNavItems.map((item, index) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.path;
+                // Effet de courbe: les items extérieurs sont plus bas
+                const marginBottom = index === 1 ? 'mb-1' : 'mb-0';
+
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => router.push(item.path)}
+                    className={`flex flex-col items-center justify-center py-2 px-2 rounded-lg transition touch-manipulation ${marginBottom} ${
+                      isActive
+                        ? 'text-primary bg-primary/10'
+                        : 'text-gray-600 hover:text-primary hover:bg-gray-100'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5 mb-1" strokeWidth={isActive ? 2.5 : 2} />
+                    <span className="text-[10px] font-medium">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Espace pour le bouton central */}
+            <div className="w-20" />
+
+            {/* Items de droite */}
+            <div className="flex-1 flex justify-around">
+              {rightNavItems.map((item, index) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.path;
+                // Effet de courbe: les items extérieurs sont plus bas
+                const marginBottom = index === 1 ? 'mb-1' : 'mb-0';
+
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => router.push(item.path)}
+                    className={`flex flex-col items-center justify-center py-2 px-2 rounded-lg transition touch-manipulation ${marginBottom} ${
+                      isActive
+                        ? 'text-primary bg-primary/10'
+                        : 'text-gray-600 hover:text-primary hover:bg-gray-100'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5 mb-1" strokeWidth={isActive ? 2.5 : 2} />
+                    <span className="text-[10px] font-medium">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </nav>
     </div>
