@@ -50,9 +50,10 @@ export const sendOtp = createAsyncThunk(
 export const register = createAsyncThunk(
   'auth/register',
   async (data: {
-    email?: string;
+    email: string;
+    verificationCode: string;
     phone: string;
-    password?: string;
+    password: string;
     firstName: string;
     lastName: string;
     country: string;
