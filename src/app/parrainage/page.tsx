@@ -58,7 +58,7 @@ export default function ParrainagePage() {
     e.preventDefault();
 
     if (parseFloat(amount) < withdrawalThreshold) {
-      toast.error(`Montant minimum: ${withdrawalThreshold.toLocaleString()} FCFA`);
+      toast.error(`Montant minimum: ${(withdrawalThreshold || 2000).toLocaleString()} FCFA`);
       return;
     }
 
@@ -197,7 +197,7 @@ export default function ParrainagePage() {
                           </span>
                         </div>
                         <p className="text-xs text-gray-500 mt-1.5 flex items-center justify-between">
-                          <span>Minimum: {withdrawalThreshold.toLocaleString()} FCFA</span>
+                          <span>Minimum: {(withdrawalThreshold || 2000).toLocaleString()} FCFA</span>
                           <span className="text-accent font-medium">Disponible: {balance.toLocaleString()} FCFA</span>
                         </p>
                       </div>
