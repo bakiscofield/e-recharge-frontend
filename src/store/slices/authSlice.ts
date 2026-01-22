@@ -58,9 +58,18 @@ export const register = createAsyncThunk(
     lastName: string;
     country: string;
     referredBy?: string;
-  }) => {
-    const response = await api.post('/auth/register', data);
-    return response.data;
+  }, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/auth/register', data);
+      return response.data;
+    } catch (error: any) {
+      // Extraire le message d'erreur détaillé du serveur
+      const errorMessage = error.response?.data?.message
+        || error.response?.data?.error
+        || error.message
+        || 'Erreur lors de l\'inscription';
+      return rejectWithValue(errorMessage);
+    }
   }
 );
 

@@ -184,11 +184,32 @@ export default function RegisterPage() {
         router.push('/depot');
       }
     } catch (error: any) {
-      const errorMessage = error.message || error.response?.data?.message || 'Erreur lors de l\'inscription';
+      // Extraire le message d'erreur - peut être une string directe ou un objet
+      let errorMessage = 'Erreur lors de l\'inscription';
+
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      // Traduire les erreurs courantes
+      const errorTranslations: Record<string, string> = {
+        'Email already exists': 'Cet email est déjà utilisé',
+        'Phone already exists': 'Ce numéro de téléphone est déjà utilisé',
+        'Invalid verification code': 'Code de vérification invalide',
+        'Verification code expired': 'Code de vérification expiré',
+        'User already exists': 'Un compte existe déjà avec ces informations',
+      };
+
+      const translatedMessage = errorTranslations[errorMessage] || errorMessage;
+
       setErrorModal({
         show: true,
         title: 'Erreur d\'inscription',
-        message: errorMessage,
+        message: translatedMessage,
       });
     } finally {
       setLoading(false);
