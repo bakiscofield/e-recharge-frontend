@@ -123,7 +123,7 @@ export default function CouponsAdminPage() {
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
 
-      const response = await api.post('/upload', formDataUpload, {
+      const response = await api.post('/upload/image', formDataUpload, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -155,7 +155,7 @@ export default function CouponsAdminPage() {
         const formDataUpload = new FormData();
         formDataUpload.append('file', file);
 
-        const response = await api.post('/upload', formDataUpload, {
+        const response = await api.post('/upload/document', formDataUpload, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
 
@@ -481,32 +481,70 @@ export default function CouponsAdminPage() {
                         Documents <span className="text-gray-400">(plusieurs fichiers possibles)</span>
                       </label>
 
-                      {/* Liste des documents uploadés */}
+                      {/* Liste des documents uploadés avec aperçu */}
                       {formData.documentUrls.length > 0 && (
-                        <div className="space-y-2 mb-3">
-                          {formData.documentUrls.map((url, index) => (
-                            <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                              <FileText className="h-6 w-6 text-blue-500 flex-shrink-0" />
-                              <span className="flex-1 text-sm text-gray-600 truncate">
-                                {url.split('/').pop()}
-                              </span>
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-1 hover:bg-gray-200 rounded text-blue-500"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </a>
-                              <button
-                                type="button"
-                                onClick={() => removeDocument(index)}
-                                className="p-1 hover:bg-red-100 rounded text-red-500"
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
-                            </div>
-                          ))}
+                        <div className="space-y-3 mb-3">
+                          {formData.documentUrls.map((url, index) => {
+                            const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+
+                            return (
+                              <div key={index} className="relative bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+                                {isImage ? (
+                                  // Aperçu image
+                                  <div className="relative">
+                                    <img
+                                      src={url}
+                                      alt={`Document ${index + 1}`}
+                                      className="w-full h-40 object-cover"
+                                    />
+                                    <div className="absolute top-2 right-2 flex gap-1">
+                                      <a
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-2 bg-white/90 hover:bg-white rounded-lg shadow text-blue-500"
+                                      >
+                                        <Eye className="h-4 w-4" />
+                                      </a>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeDocument(index)}
+                                        className="p-2 bg-white/90 hover:bg-white rounded-lg shadow text-red-500"
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </button>
+                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-3 py-1 truncate">
+                                      {url.split('/').pop()}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  // Affichage fichier non-image
+                                  <div className="flex items-center gap-3 p-3">
+                                    <FileText className="h-8 w-8 text-blue-500 flex-shrink-0" />
+                                    <span className="flex-1 text-sm text-gray-600 truncate">
+                                      {url.split('/').pop()}
+                                    </span>
+                                    <a
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-2 hover:bg-gray-200 rounded text-blue-500"
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </a>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeDocument(index)}
+                                      className="p-2 hover:bg-red-100 rounded text-red-500"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
 
@@ -727,7 +765,6 @@ export default function CouponsAdminPage() {
                     <CouponCard
                       key={coupon.id}
                       coupon={coupon}
-                      onView={() => setViewCoupon(coupon)}
                       onEdit={() => openEditForm(coupon)}
                       onToggle={() => toggleCouponStatus(coupon.id)}
                       onDelete={() => deleteCoupon(coupon.id)}
@@ -749,7 +786,6 @@ export default function CouponsAdminPage() {
                     <CouponCard
                       key={coupon.id}
                       coupon={coupon}
-                      onView={() => setViewCoupon(coupon)}
                       onEdit={() => openEditForm(coupon)}
                       onToggle={() => toggleCouponStatus(coupon.id)}
                       onDelete={() => deleteCoupon(coupon.id)}
@@ -767,13 +803,11 @@ export default function CouponsAdminPage() {
 
 function CouponCard({
   coupon,
-  onView,
   onEdit,
   onToggle,
   onDelete,
 }: {
   coupon: Coupon;
-  onView: () => void;
   onEdit: () => void;
   onToggle: () => void;
   onDelete: () => void;
@@ -828,19 +862,51 @@ function CouponCard({
           {dayjs(coupon.date).format('DD MMM YYYY HH:mm')}
         </div>
 
+        {/* Contenu visible directement */}
+        {coupon.content && (
+          <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-800 whitespace-pre-wrap line-clamp-4">{coupon.content}</p>
+          </div>
+        )}
+
+        {/* Documents visibles directement */}
+        {((coupon.documentUrls && coupon.documentUrls.length > 0) || coupon.documentUrl) && (
+          <div className="mb-3 space-y-2">
+            {coupon.documentUrls?.map((url, index) => (
+              <a
+                key={index}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition text-sm"
+              >
+                <FileText className="h-4 w-4 flex-shrink-0" />
+                <span className="flex-1 truncate">{url.split('/').pop()}</span>
+                <Eye className="h-4 w-4 flex-shrink-0" />
+              </a>
+            ))}
+            {coupon.documentUrl && !coupon.documentUrls?.length && (
+              <a
+                href={coupon.documentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition text-sm"
+              >
+                <FileText className="h-4 w-4 flex-shrink-0" />
+                <span className="flex-1 truncate">{coupon.documentUrl.split('/').pop()}</span>
+                <Eye className="h-4 w-4 flex-shrink-0" />
+              </a>
+            )}
+          </div>
+        )}
+
         <div className="flex gap-2">
           <button
-            onClick={onView}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm"
-          >
-            <Eye className="h-4 w-4" />
-            Voir
-          </button>
-          <button
             onClick={onEdit}
-            className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
+            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm"
           >
             <Edit2 className="h-4 w-4" />
+            Modifier
           </button>
           <button
             onClick={onToggle}

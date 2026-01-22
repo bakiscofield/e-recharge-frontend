@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
 import { register } from '@/store/slices/authSlice';
 import toast from 'react-hot-toast';
-import { Mail, Lock, User, Phone, Globe, Gift, ArrowRight, ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, Phone, Globe, Gift, ArrowRight, ArrowLeft, Loader2, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { useAppConfig } from '@/hooks/useAppConfig';
 import api from '@/lib/api';
 
@@ -36,6 +36,11 @@ export default function RegisterPage() {
 
   const [promoCodeValid, setPromoCodeValid] = useState<boolean | null>(null);
   const [checkingPromo, setCheckingPromo] = useState(false);
+  const [errorModal, setErrorModal] = useState<{ show: boolean; title: string; message: string }>({
+    show: false,
+    title: '',
+    message: '',
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -78,7 +83,12 @@ export default function RegisterPage() {
         });
       }, 1000);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Erreur lors de l\'envoi du code');
+      const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de l\'envoi du code';
+      setErrorModal({
+        show: true,
+        title: 'Erreur d\'envoi',
+        message: errorMessage,
+      });
     } finally {
       setSendingCode(false);
     }
@@ -174,7 +184,12 @@ export default function RegisterPage() {
         router.push('/depot');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de l\'inscription');
+      const errorMessage = error.message || error.response?.data?.message || 'Erreur lors de l\'inscription';
+      setErrorModal({
+        show: true,
+        title: 'Erreur d\'inscription',
+        message: errorMessage,
+      });
     } finally {
       setLoading(false);
     }
@@ -182,6 +197,26 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col overflow-x-hidden">
+      {/* Error Modal */}
+      {errorModal.show && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <div className="text-center mb-4">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertCircle className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{errorModal.title}</h3>
+              <p className="text-sm text-gray-600 whitespace-pre-wrap">{errorModal.message}</p>
+            </div>
+            <button
+              onClick={() => setErrorModal({ show: false, title: '', message: '' })}
+              className="w-full px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
       <div className="flex-1 flex items-center justify-center p-3 sm:p-4">
         <div className="w-full max-w-md">
           {/* Header */}

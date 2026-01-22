@@ -213,31 +213,40 @@ export default function DepotPage() {
                   <p className="text-xs sm:text-sm mt-1">Veuillez contacter l'administration</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  {bookmakers.map((bm) => (
-                    <button
-                      key={bm.id}
-                      onClick={() => setFormData({ ...formData, bookmakerId: bm.id })}
-                      className={`p-3 sm:p-4 border-2 rounded-lg transition ${
-                        formData.bookmakerId === bm.id
-                          ? 'border-primary bg-primary/5'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center gap-1 sm:gap-2">
-                        {bm.logo ? (
-                          <img
-                            src={bm.logo}
-                            alt={bm.name}
-                            className="h-8 sm:h-10 w-auto object-contain"
-                          />
-                        ) : (
-                          <Building2 className="h-8 sm:h-10 w-8 sm:w-10 text-gray-400" />
-                        )}
-                        <div className="font-semibold text-xs sm:text-sm">{bm.name}</div>
-                      </div>
-                    </button>
-                  ))}
+                <div className="relative">
+                  <select
+                    value={formData.bookmakerId}
+                    onChange={(e) => setFormData({ ...formData, bookmakerId: e.target.value })}
+                    className="w-full px-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl bg-white text-sm sm:text-base font-medium appearance-none cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  >
+                    <option value="">Sélectionner un bookmaker...</option>
+                    {bookmakers.map((bm) => (
+                      <option key={bm.id} value={bm.id}>
+                        {bm.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+              {formData.bookmakerId && (
+                <div className="mt-3 flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                  {bookmakers.find(bm => bm.id === formData.bookmakerId)?.logo ? (
+                    <img
+                      src={bookmakers.find(bm => bm.id === formData.bookmakerId)?.logo}
+                      alt=""
+                      className="h-8 w-auto object-contain"
+                    />
+                  ) : (
+                    <Building2 className="h-8 w-8 text-primary" />
+                  )}
+                  <span className="font-semibold text-primary">
+                    {bookmakers.find(bm => bm.id === formData.bookmakerId)?.name}
+                  </span>
                 </div>
               )}
             </div>

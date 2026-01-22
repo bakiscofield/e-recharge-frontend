@@ -38,6 +38,7 @@ export function SuperAdminHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   const navigation = [
     { name: 'Dashboard', href: '/super-admin', icon: LayoutDashboard },
@@ -206,81 +207,46 @@ export function SuperAdminHeader() {
             </button>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile logout button */}
           <div className="flex md:hidden flex-shrink-0">
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 sm:p-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg active:bg-gray-200 transition"
+              onClick={() => setLogoutModalOpen(true)}
+              className="p-2 sm:p-3 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg active:bg-red-100 transition"
+              title="Déconnexion"
             >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6 sm:h-7 sm:w-7" />
-              ) : (
-                <Menu className="h-6 w-6 sm:h-7 sm:w-7" />
-              )}
+              <LogOut className="h-6 w-6 sm:h-7 sm:w-7" />
             </button>
           </div>
         </div>
 
-        {/* Mobile menu - Tous les éléments */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-3 space-y-2 max-h-[calc(100vh-4rem)] overflow-y-auto">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              const showBadge = item.href === '/admin/chat' && unreadCount > 0;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => {
-                    router.push(item.href);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`
-                    w-full px-5 py-4 rounded-xl font-semibold text-base transition-all flex items-center gap-4 active:scale-95 relative
-                    ${active
-                      ? 'bg-primary text-white shadow-lg'
-                      : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
-                    }
-                  `}
-                >
-                  <Icon className="h-6 w-6" />
-                  {item.name}
-                  {showBadge && (
-                    <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-
-            <div className="pt-3 border-t border-gray-200 space-y-2">
-              {/* User Info */}
-              <div className="px-5 py-3 bg-gray-50 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-semibold">
-                    {user?.firstName?.[0]}{user?.lastName?.[0]}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-gray-900">
-                      {user?.firstName} {user?.lastName}
-                    </div>
-                    <div className="text-xs text-gray-500">Super Administrateur</div>
-                  </div>
+        {/* Mobile Logout Modal */}
+        {logoutModalOpen && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 md:hidden">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                  <LogOut className="h-8 w-8 text-red-600" />
                 </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Déconnexion</h3>
+                <p className="text-sm text-gray-600">Voulez-vous vraiment vous déconnecter ?</p>
               </div>
-
-              {/* Logout Button */}
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full px-5 py-4 rounded-xl font-semibold text-base text-red-600 hover:bg-red-50 active:bg-red-100 transition flex items-center gap-4 active:scale-95"
-              >
-                <LogOut className="h-6 w-6" />
-                Déconnexion
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setLogoutModalOpen(false)}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setLogoutModalOpen(false);
+                  }}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition"
+                >
+                  Déconnexion
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -26,6 +26,7 @@ export function AdminHeader() {
   const { unreadCount } = useSelector((state: RootState) => state.chat);
   const { appName, appLogo } = useAppConfig();
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -172,7 +173,7 @@ export function AdminHeader() {
 
             {/* Logout Mobile */}
             <button
-              onClick={handleLogout}
+              onClick={() => setLogoutModalOpen(true)}
               className="p-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
               title="Déconnexion"
             >
@@ -181,6 +182,38 @@ export function AdminHeader() {
           </div>
         </div>
       </nav>
+
+      {/* Mobile Logout Modal */}
+      {logoutModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 md:hidden">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                <LogOut className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Déconnexion</h3>
+              <p className="text-sm text-gray-600">Voulez-vous vraiment vous déconnecter ?</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setLogoutModalOpen(false)}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setLogoutModalOpen(false);
+                }}
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition"
+              >
+                Déconnexion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Notification Panel */}
       <AdminNotificationPanel

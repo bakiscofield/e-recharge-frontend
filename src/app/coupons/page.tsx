@@ -11,11 +11,12 @@ dayjs.locale('fr');
 
 interface Coupon {
   id: string;
-  title: string;
-  description: string;
-  content: string;
+  title?: string;
+  description?: string;
+  content?: string;
   imageUrl?: string;
   documentUrl?: string;
+  documentUrls?: string[];
   type: 'MATCH' | 'COUPON';
   date: string;
   isActive: boolean;
@@ -190,17 +191,17 @@ export default function CouponsPage() {
         {/* Modal de détails */}
         {selectedCoupon && (
           <div
-            className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center"
             onClick={() => setSelectedCoupon(null)}
           >
             <div
-              className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[80vh] overflow-hidden"
+              className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header modal */}
-              <div className="bg-gradient-to-r from-primary to-primary/80 p-4 text-white">
+              <div className="bg-gradient-to-r from-primary to-primary/80 p-4 text-white sticky top-0 z-10">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-lg">{selectedCoupon.title}</h3>
+                  <h3 className="font-bold text-lg">{selectedCoupon.title || 'Détails'}</h3>
                   <button
                     onClick={() => setSelectedCoupon(null)}
                     className="p-1 hover:bg-white/20 rounded-full transition"
@@ -213,34 +214,81 @@ export default function CouponsPage() {
                 </p>
               </div>
 
-              {/* Contenu modal */}
-              <div className="p-4 overflow-y-auto max-h-[60vh]">
+              {/* Contenu modal - défilement vertical */}
+              <div className="p-4 overflow-y-auto max-h-[75vh] space-y-4">
+                {/* Image principale */}
                 {selectedCoupon.imageUrl && (
                   <img
                     src={selectedCoupon.imageUrl}
-                    alt={selectedCoupon.title}
-                    className="w-full rounded-lg mb-4"
+                    alt={selectedCoupon.title || 'Image'}
+                    className="w-full rounded-lg"
                   />
                 )}
 
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-gray-600 mb-4">{selectedCoupon.description}</p>
-                  <div
-                    className="text-gray-800 whitespace-pre-wrap"
-                    dangerouslySetInnerHTML={{ __html: selectedCoupon.content }}
-                  />
-                </div>
+                {/* Description et contenu */}
+                {(selectedCoupon.description || selectedCoupon.content) && (
+                  <div className="prose prose-sm max-w-none">
+                    {selectedCoupon.description && (
+                      <p className="text-gray-600 mb-2">{selectedCoupon.description}</p>
+                    )}
+                    {selectedCoupon.content && (
+                      <div className="text-gray-800 whitespace-pre-wrap">
+                        {selectedCoupon.content}
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                {selectedCoupon.documentUrl && (
-                  <a
-                    href={selectedCoupon.documentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 mt-4 bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary/90 transition"
-                  >
-                    <Download className="h-5 w-5" />
-                    Télécharger le document
-                  </a>
+                {/* Documents multiples - affichés verticalement */}
+                {((selectedCoupon.documentUrls && selectedCoupon.documentUrls.length > 0) || selectedCoupon.documentUrl) && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-gray-700">
+                      Documents ({selectedCoupon.documentUrls?.length || 1})
+                    </p>
+
+                    {/* Afficher les documents comme images si ce sont des images */}
+                    {(selectedCoupon.documentUrls || [selectedCoupon.documentUrl]).filter(Boolean).map((url, index) => {
+                      const isImage = url && /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+
+                      if (isImage) {
+                        return (
+                          <div key={index} className="space-y-2">
+                            <img
+                              src={url}
+                              alt={`Document ${index + 1}`}
+                              className="w-full rounded-lg border border-gray-200"
+                            />
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-200 transition"
+                            >
+                              <Eye className="h-4 w-4" />
+                              Ouvrir en grand
+                            </a>
+                          </div>
+                        );
+                      }
+
+                      // Pour les PDF et autres documents
+                      return (
+                        <a
+                          key={index}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition"
+                        >
+                          <FileText className="h-6 w-6 flex-shrink-0" />
+                          <span className="flex-1 truncate text-sm">
+                            {url?.split('/').pop() || `Document ${index + 1}`}
+                          </span>
+                          <Download className="h-5 w-5 flex-shrink-0" />
+                        </a>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </div>
@@ -253,27 +301,48 @@ export default function CouponsPage() {
 
 // Composant carte match
 function MatchCard({ match, onView }: { match: Coupon; onView: () => void }) {
+  const docCount = match.documentUrls?.length || (match.documentUrl ? 1 : 0);
+
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h3 className="font-bold text-gray-900">{match.title}</h3>
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{match.description}</p>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-              {dayjs(match.date).format('HH:mm')}
-            </span>
-            <span className="text-xs text-gray-500">
-              {dayjs(match.date).format('DD MMM YYYY')}
-            </span>
+    <div
+      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+      onClick={onView}
+    >
+      {/* Image preview si disponible */}
+      {match.imageUrl && (
+        <img
+          src={match.imageUrl}
+          alt={match.title || 'Match'}
+          className="w-full h-32 object-cover"
+        />
+      )}
+
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-gray-900 truncate">{match.title || 'Match du jour'}</h3>
+            {match.description && (
+              <p className="text-sm text-gray-600 mt-1 line-clamp-2">{match.description}</p>
+            )}
+            <div className="flex items-center flex-wrap gap-2 mt-2">
+              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                {dayjs(match.date).format('HH:mm')}
+              </span>
+              <span className="text-xs text-gray-500">
+                {dayjs(match.date).format('DD MMM YYYY')}
+              </span>
+              {docCount > 0 && (
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1">
+                  <FileText className="h-3 w-3" />
+                  {docCount} doc{docCount > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="p-2 bg-primary/10 text-primary rounded-lg flex-shrink-0">
+            <Eye className="h-5 w-5" />
           </div>
         </div>
-        <button
-          onClick={onView}
-          className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition"
-        >
-          <Eye className="h-5 w-5" />
-        </button>
       </div>
     </div>
   );
@@ -281,35 +350,41 @@ function MatchCard({ match, onView }: { match: Coupon; onView: () => void }) {
 
 // Composant carte coupon
 function CouponCard({ coupon, onView }: { coupon: Coupon; onView: () => void }) {
+  const docCount = coupon.documentUrls?.length || (coupon.documentUrl ? 1 : 0);
+
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+    <div
+      className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer active:scale-[0.98] transition-transform"
+      onClick={onView}
+    >
+      {/* Image preview */}
       {coupon.imageUrl && (
         <img
           src={coupon.imageUrl}
-          alt={coupon.title}
+          alt={coupon.title || 'Coupon'}
           className="w-full h-40 object-cover"
         />
       )}
+
       <div className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="font-bold text-gray-900">{coupon.title}</h3>
-            <p className="text-sm text-gray-600 mt-1 line-clamp-2">{coupon.description}</p>
-            <div className="flex items-center gap-2 mt-3">
-              <span className="text-xs text-gray-500">
-                Publié le {dayjs(coupon.createdAt).format('DD/MM/YYYY')}
-              </span>
-              {coupon.documentUrl && (
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <FileText className="h-3 w-3" />
-                  Document
-                </span>
-              )}
-            </div>
-          </div>
+        <h3 className="font-bold text-gray-900">{coupon.title || 'Coupon du jour'}</h3>
+        {coupon.description && (
+          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{coupon.description}</p>
+        )}
+
+        <div className="flex items-center flex-wrap gap-2 mt-3">
+          <span className="text-xs text-gray-500">
+            Publié le {dayjs(coupon.createdAt).format('DD/MM/YYYY')}
+          </span>
+          {docCount > 0 && (
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              {docCount} document{docCount > 1 ? 's' : ''}
+            </span>
+          )}
         </div>
+
         <button
-          onClick={onView}
           className="w-full mt-4 flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-lg font-medium hover:bg-primary/90 transition"
         >
           <Eye className="h-5 w-5" />

@@ -333,10 +333,12 @@ export default function DemandesPage() {
                         </div>
                       </div>
 
-                      {/* Référence */}
+                      {/* Code retrait / Référence */}
                       {order.referenceId && (
                         <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg sm:rounded-xl p-3 sm:p-4">
-                          <div className="text-xs font-medium text-gray-600 mb-1">Référence de transaction</div>
+                          <div className="text-xs font-medium text-gray-600 mb-1">
+                            {order.type === 'RETRAIT' ? 'Code retrait' : 'Référence de transaction'}
+                          </div>
                           <div className="font-mono text-sm sm:text-base font-semibold text-gray-900">{order.referenceId}</div>
                         </div>
                       )}
