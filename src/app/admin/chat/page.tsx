@@ -68,6 +68,8 @@ export default function AdminChatPage() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isInputFocused = useRef(false);
 
   // Initialiser WebSocket
   useEffect(() => {
@@ -93,8 +95,10 @@ export default function AdminChatPage() {
           return [...prev, message];
         });
       }
-      // Rafraîchir la liste des conversations
-      loadConversations();
+      // Rafraîchir la liste des conversations (seulement si input pas focus)
+      if (!isInputFocused.current) {
+        loadConversations();
+      }
     });
 
     newSocket.on('new_client_message', (data) => {
@@ -240,9 +244,11 @@ export default function AdminChatPage() {
     }
   };
 
-  // Scroll vers le bas
+  // Scroll vers le bas (seulement si l'input n'est pas focus pour éviter le bug clavier mobile)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!isInputFocused.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   // Filtrer les conversations
@@ -358,8 +364,11 @@ export default function AdminChatPage() {
           </button>
           <div className="flex-1">
             <textarea
+              ref={textareaRef}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
+              onFocus={() => { isInputFocused.current = true; }}
+              onBlur={() => { isInputFocused.current = false; }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
