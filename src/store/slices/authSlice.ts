@@ -51,7 +51,7 @@ export const register = createAsyncThunk(
   'auth/register',
   async (data: {
     email: string;
-    emailCode?: string;
+    verificationCode: string;
     phone: string;
     password: string;
     firstName: string;

@@ -161,7 +161,7 @@ export default function RegisterPage() {
     try {
       const registerData: any = {
         email: formData.email,
-        emailCode: formData.verificationCode, // Le backend attend 'emailCode' pas 'verificationCode'
+        verificationCode: formData.verificationCode,
         phone: formData.phone,
         password: formData.password,
         firstName: formData.firstName,
