@@ -184,27 +184,47 @@ export default function RegisterPage() {
         router.push('/depot');
       }
     } catch (error: any) {
+      // Logger l'erreur complète pour debug
+      console.log('Registration error:', error);
+      console.log('Error type:', typeof error);
+      console.log('Error stringified:', JSON.stringify(error, null, 2));
+
       // Extraire le message d'erreur - peut être une string directe ou un objet
       let errorMessage = 'Erreur lors de l\'inscription';
 
       if (typeof error === 'string') {
         errorMessage = error;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      } else if (typeof error === 'object' && error !== null) {
+        // Essayer différents chemins possibles pour le message
+        errorMessage = error.message
+          || error.payload
+          || error.error
+          || error.data?.message
+          || error.response?.data?.message
+          || error.response?.data?.error
+          || (Array.isArray(error.response?.data?.message) ? error.response.data.message.join(', ') : null)
+          || JSON.stringify(error);
       }
 
       // Traduire les erreurs courantes
       const errorTranslations: Record<string, string> = {
         'Email already exists': 'Cet email est déjà utilisé',
         'Phone already exists': 'Ce numéro de téléphone est déjà utilisé',
-        'Invalid verification code': 'Code de vérification invalide',
-        'Verification code expired': 'Code de vérification expiré',
+        'Invalid verification code': 'Code de vérification invalide ou expiré',
+        'Verification code expired': 'Code de vérification expiré. Veuillez en demander un nouveau.',
         'User already exists': 'Un compte existe déjà avec ces informations',
+        'email must be an email': 'Veuillez entrer un email valide',
+        'phone must be a valid phone number': 'Veuillez entrer un numéro de téléphone valide',
       };
 
-      const translatedMessage = errorTranslations[errorMessage] || errorMessage;
+      // Chercher une traduction partielle
+      let translatedMessage = errorMessage;
+      for (const [key, value] of Object.entries(errorTranslations)) {
+        if (errorMessage.toLowerCase().includes(key.toLowerCase())) {
+          translatedMessage = value;
+          break;
+        }
+      }
 
       setErrorModal({
         show: true,
