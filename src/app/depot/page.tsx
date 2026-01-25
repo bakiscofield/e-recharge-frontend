@@ -9,6 +9,8 @@ import { createOrder } from '@/store/slices/ordersSlice';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { Globe, Wallet, Building2, Users, DollarSign, Phone, CreditCard, ArrowRight, Copy, Check } from 'lucide-react';
+import BookmakerSelect from '@/components/BookmakerSelect';
+import AgentSelect from '@/components/AgentSelect';
 import { WaitingModal } from '@/components/Modal/WaitingModal';
 
 export default function DepotPage() {
@@ -213,25 +215,12 @@ export default function DepotPage() {
                   <p className="text-xs sm:text-sm mt-1">Veuillez contacter l'administration</p>
                 </div>
               ) : (
-                <div className="relative">
-                  <select
-                    value={formData.bookmakerId}
-                    onChange={(e) => setFormData({ ...formData, bookmakerId: e.target.value })}
-                    className="w-full px-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl bg-white text-sm sm:text-base font-medium appearance-none cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  >
-                    <option value="">Sélectionner un bookmaker...</option>
-                    {bookmakers.map((bm) => (
-                      <option key={bm.id} value={bm.id}>
-                        {bm.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
+                <BookmakerSelect
+                  bookmakers={bookmakers}
+                  value={formData.bookmakerId}
+                  onChange={(value) => setFormData({ ...formData, bookmakerId: value })}
+                  placeholder="Sélectionner un bookmaker..."
+                />
               )}
               {formData.bookmakerId && (
                 <div className="mt-3 flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
@@ -311,34 +300,17 @@ export default function DepotPage() {
                   <p className="text-xs sm:text-sm">Aucun agent disponible pour le moment</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {agents.map((agent) => (
-                    <button
-                      key={agent.id}
-                      onClick={() => {
-                        setFormData({ ...formData, employeePaymentMethodId: agent.id });
-                        setSelectedAgent(agent);
-                      }}
-                      className={`w-full p-3 sm:p-4 border-2 rounded-lg text-left transition ${
-                        formData.employeePaymentMethodId === agent.id
-                          ? 'border-primary bg-primary/5'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-semibold text-sm sm:text-base">
-                            {agent.employee.firstName} {agent.employee.lastName}
-                          </div>
-                          <div className="text-xs sm:text-sm text-gray-600">Frais: {agent.frais} FCFA</div>
-                        </div>
-                        {agent.employee.isOnline && (
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                <AgentSelect
+                  agents={agents}
+                  value={formData.employeePaymentMethodId}
+                  onChange={(value, agent) => {
+                    setFormData({ ...formData, employeePaymentMethodId: value });
+                    setSelectedAgent(agent);
+                  }}
+                  placeholder="Sélectionner un agent..."
+                  showFrais={true}
+                  variant="primary"
+                />
               )}
             </div>
 
@@ -425,13 +397,14 @@ export default function DepotPage() {
             <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Phone className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                Votre contact
+                Numéro utilisé pour le dépôt
               </label>
               <input
                 type="tel"
                 value={formData.clientContact}
                 onChange={(e) => setFormData({ ...formData, clientContact: e.target.value })}
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
+                placeholder="Ex: +22890000000"
               />
             </div>
 

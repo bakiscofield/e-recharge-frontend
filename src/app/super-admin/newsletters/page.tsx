@@ -52,6 +52,14 @@ export default function NewslettersPage() {
   const [editingNewsletter, setEditingNewsletter] = useState<Newsletter | null>(null);
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [sendConfirmModal, setSendConfirmModal] = useState<string | null>(null);
+  const [sendResult, setSendResult] = useState<{
+    success: boolean;
+    totalSubscribers?: number;
+    sentCount?: number;
+    failedCount?: number;
+    error?: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -169,19 +177,23 @@ export default function NewslettersPage() {
   };
 
   const handleSendNewsletter = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir envoyer cette newsletter à tous les abonnés ?'))
-      return;
-
     setSending(true);
+    setSendConfirmModal(null);
     try {
       const response = await api.post(`/newsletters/${id}/send`);
-      alert(
-        `Newsletter envoyée avec succès !\n\nAbonnés ciblés: ${response.data.totalSubscribers}\nEnvoyés: ${response.data.sentCount}\nÉchecs: ${response.data.failedCount}`
-      );
+      setSendResult({
+        success: true,
+        totalSubscribers: response.data.totalSubscribers,
+        sentCount: response.data.sentCount,
+        failedCount: response.data.failedCount,
+      });
       await fetchNewsletters();
     } catch (error: any) {
       console.error('Erreur lors de l\'envoi:', error);
-      alert(error.response?.data?.message || 'Erreur lors de l\'envoi de la newsletter');
+      setSendResult({
+        success: false,
+        error: error.response?.data?.message || 'Erreur lors de l\'envoi de la newsletter',
+      });
     } finally {
       setSending(false);
     }
@@ -369,7 +381,7 @@ export default function NewslettersPage() {
                           Dépublier
                         </button>
                         <button
-                          onClick={() => handleSendNewsletter(newsletter.id)}
+                          onClick={() => setSendConfirmModal(newsletter.id)}
                           disabled={sending}
                           className="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition disabled:opacity-50"
                         >
@@ -581,6 +593,105 @@ export default function NewslettersPage() {
                   Sauvegarder
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Modal de confirmation d'envoi */}
+        {sendConfirmModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Send className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Confirmer l'envoi</h3>
+                <p className="text-gray-600">
+                  Êtes-vous sûr de vouloir envoyer cette newsletter à tous les abonnés ciblés ?
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setSendConfirmModal(null)}
+                  disabled={sending}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition disabled:opacity-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => handleSendNewsletter(sendConfirmModal)}
+                  disabled={sending}
+                  className="flex-1 px-4 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {sending ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Envoi...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Envoyer
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Modal de résultat d'envoi */}
+        {sendResult && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <div className="text-center mb-6">
+                {sendResult.success ? (
+                  <>
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                      <Check className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Newsletter envoyée !</h3>
+                    <div className="space-y-2 text-gray-600">
+                      <p className="flex justify-between px-4 py-2 bg-gray-50 rounded-lg">
+                        <span>Abonnés ciblés</span>
+                        <span className="font-semibold text-gray-900">{sendResult.totalSubscribers}</span>
+                      </p>
+                      <p className="flex justify-between px-4 py-2 bg-green-50 rounded-lg">
+                        <span>Envoyés avec succès</span>
+                        <span className="font-semibold text-green-600">{sendResult.sentCount}</span>
+                      </p>
+                      {sendResult.failedCount !== undefined && sendResult.failedCount > 0 && (
+                        <p className="flex justify-between px-4 py-2 bg-red-50 rounded-lg">
+                          <span>Échecs</span>
+                          <span className="font-semibold text-red-600">{sendResult.failedCount}</span>
+                        </p>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                      <X className="h-8 w-8 text-red-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Erreur d'envoi</h3>
+                    <p className="text-red-600">{sendResult.error}</p>
+                  </>
+                )}
+              </div>
+              <button
+                onClick={() => setSendResult(null)}
+                className="w-full px-4 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 transition"
+              >
+                Fermer
+              </button>
             </motion.div>
           </div>
         )}

@@ -2,6 +2,48 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 /**
+ * Wait for all images in an element to be fully loaded
+ * @param element - The DOM element containing images
+ */
+async function waitForImages(element: HTMLElement): Promise<void> {
+  const images = element.querySelectorAll('img');
+  const promises = Array.from(images).map((img) => {
+    if (img.complete) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      img.onload = () => resolve();
+      img.onerror = () => resolve(); // Continue even if image fails
+    });
+  });
+  await Promise.all(promises);
+}
+
+/**
+ * Convert external images to base64 to avoid CORS issues
+ * @param element - The DOM element containing images
+ */
+async function convertImagesToBase64(element: HTMLElement): Promise<void> {
+  const images = element.querySelectorAll('img');
+
+  for (const img of Array.from(images)) {
+    if (!img.src || img.src.startsWith('data:')) continue;
+
+    try {
+      const response = await fetch(img.src, { mode: 'cors' });
+      const blob = await response.blob();
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+      img.src = base64;
+    } catch (error) {
+      // If CORS fails, try without mode: 'cors' for same-origin images
+      console.warn('Could not convert image to base64:', img.src);
+    }
+  }
+}
+
+/**
  * Preview a transaction receipt without downloading
  * @param orderId - The ID of the order to preview
  */
@@ -13,12 +55,17 @@ export async function previewReceipt(orderId: string): Promise<void> {
   }
 
   try {
+    // Wait for images to load and convert to base64
+    await waitForImages(element);
+    await convertImagesToBase64(element);
+
     // Create canvas from the receipt element
     const canvas = await html2canvas(element, {
       scale: 2,
       backgroundColor: '#ffffff',
       logging: false,
       useCORS: true,
+      allowTaint: false,
     });
 
     // Convert canvas to data URL
@@ -64,12 +111,17 @@ export async function downloadReceiptAsPNG(orderId: string): Promise<void> {
   }
 
   try {
+    // Wait for images to load and convert to base64
+    await waitForImages(element);
+    await convertImagesToBase64(element);
+
     // Create canvas from the receipt element
     const canvas = await html2canvas(element, {
       scale: 2, // Higher quality
       backgroundColor: '#ffffff',
       logging: false,
       useCORS: true,
+      allowTaint: false,
     });
 
     // Convert canvas to blob
@@ -104,42 +156,53 @@ export async function downloadReceiptAsPDF(orderId: string): Promise<void> {
   }
 
   try {
+    // Wait for images to load and convert to base64
+    await waitForImages(element);
+    await convertImagesToBase64(element);
+
     // Create canvas from the receipt element
     const canvas = await html2canvas(element, {
       scale: 2, // Higher quality
       backgroundColor: '#ffffff',
       logging: false,
       useCORS: true,
+      allowTaint: false,
     });
 
     const imgData = canvas.toDataURL('image/png');
 
     // Calculate PDF dimensions
-    const imgWidth = 210; // A4 width in mm
+    const pageWidth = 210; // A4 width in mm
     const pageHeight = 297; // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const margin = 10; // Margin in mm
+
+    const availableWidth = pageWidth - (margin * 2);
+    const availableHeight = pageHeight - (margin * 2);
+
+    // Calculate aspect ratio and scale to fit on one page
+    const aspectRatio = canvas.width / canvas.height;
+    let imgWidth = availableWidth;
+    let imgHeight = imgWidth / aspectRatio;
+
+    // If height exceeds available space, scale down to fit
+    if (imgHeight > availableHeight) {
+      imgHeight = availableHeight;
+      imgWidth = imgHeight * aspectRatio;
+    }
+
+    // Center the image on the page
+    const xOffset = (pageWidth - imgWidth) / 2;
+    const yOffset = (pageHeight - imgHeight) / 2;
 
     // Create PDF
     const pdf = new jsPDF({
-      orientation: imgHeight > imgWidth ? 'portrait' : 'portrait',
+      orientation: 'portrait',
       unit: 'mm',
       format: 'a4',
     });
 
-    // Add image to PDF
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    // Add new pages if content is longer than one page
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
+    // Add image to PDF - always on one page, centered
+    pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
 
     // Download PDF
     pdf.save(`recu-${orderId.slice(0, 8)}-${Date.now()}.pdf`);

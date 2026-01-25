@@ -140,34 +140,11 @@ export default function AgentAssignmentsPage() {
 
   const parseAddress = (address?: string): { street: string; city: string } => {
     if (!address) return { street: '', city: '' };
-
-    // Essayer de parser comme JSON d'abord
-    try {
-      const parsed = JSON.parse(address);
-      if (parsed && typeof parsed === 'object') {
-        return {
-          street: parsed.street || '',
-          city: parsed.city || '',
-        };
-      }
-    } catch {
-      // Si ce n'est pas du JSON, essayer le format "rue, ville"
-      const parts = address.split(',');
-      return {
-        street: parts[0]?.trim() || '',
-        city: parts[1]?.trim() || '',
-      };
-    }
-    return { street: '', city: '' };
-  };
-
-  const formatAddressDisplay = (address?: string): string => {
-    if (!address) return '';
-    const { street, city } = parseAddress(address);
-    if (street && city) return `${street}, ${city}`;
-    if (street) return street;
-    if (city) return city;
-    return address;
+    const parts = address.split(',');
+    return {
+      street: parts[0]?.trim() || '',
+      city: parts[1]?.trim() || '',
+    };
   };
 
   const openEditModal = (assignment: AgentAssignment) => {
@@ -372,7 +349,7 @@ export default function AgentAssignmentsPage() {
                     {assignment.address && (
                       <div className="pt-3 border-t border-gray-200">
                         <div className="text-sm text-gray-600 mb-1">📍 Adresse de retrait</div>
-                        <div className="text-gray-900">{formatAddressDisplay(assignment.address)}</div>
+                        <div className="text-gray-900">{assignment.address}</div>
                       </div>
                     )}
                   </div>

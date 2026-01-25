@@ -122,6 +122,14 @@ export function AdminHeader() {
               </div>
             </div>
 
+            {/* Points Echo Desktop */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 rounded-lg">
+              <span className="text-sm font-semibold text-primary">
+                {user?.referralBalance?.toLocaleString() || 0}
+              </span>
+              <span className="text-xs text-primary/70">pts echo</span>
+            </div>
+
             {/* Logout */}
             <button
               onClick={handleLogout}
@@ -170,6 +178,14 @@ export function AdminHeader() {
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
+
+            {/* Points Echo Mobile */}
+            <div className="flex items-center gap-1 px-2 py-1.5 bg-primary/10 rounded-lg">
+              <span className="text-xs font-semibold text-primary">
+                {user?.referralBalance?.toLocaleString() || 0}
+              </span>
+              <span className="text-[10px] text-primary/70">pts</span>
+            </div>
 
             {/* Logout Mobile */}
             <button

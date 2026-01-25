@@ -10,6 +10,8 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { Building2, Wallet, DollarSign, Phone, Key, MapPin, ArrowRight } from 'lucide-react';
 import { WaitingModal } from '@/components/Modal/WaitingModal';
+import BookmakerSelect from '@/components/BookmakerSelect';
+import AgentSelect from '@/components/AgentSelect';
 
 export default function RetraitPage() {
   const router = useRouter();
@@ -127,7 +129,7 @@ export default function RetraitPage() {
     }
 
     if (!formData.clientContact || !formData.clientContact.trim()) {
-      toast.error('Votre contact est requis');
+      toast.error('Le numéro pour recevoir l\'argent est requis');
       return;
     }
 
@@ -210,32 +212,12 @@ export default function RetraitPage() {
                   <p className="text-xs sm:text-sm mt-1">Veuillez contacter l'administration</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  {bookmakers.map((bm) => (
-                    <button
-                      key={bm.id}
-                      onClick={() => setFormData({ ...formData, bookmakerId: bm.id })}
-                      className={`p-3 sm:p-4 border-2 rounded-lg transition ${
-                        formData.bookmakerId === bm.id
-                          ? 'border-secondary bg-secondary/5'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center gap-1 sm:gap-2">
-                        {bm.logo ? (
-                          <img
-                            src={bm.logo}
-                            alt={bm.name}
-                            className="h-8 sm:h-10 w-auto object-contain"
-                          />
-                        ) : (
-                          <Building2 className="h-8 sm:h-10 w-8 sm:w-10 text-gray-400" />
-                        )}
-                        <div className="font-semibold text-xs sm:text-sm">{bm.name}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                <BookmakerSelect
+                  bookmakers={bookmakers}
+                  value={formData.bookmakerId}
+                  onChange={(value) => setFormData({ ...formData, bookmakerId: value })}
+                  placeholder="Sélectionner un bookmaker..."
+                />
               )}
             </div>
 
@@ -299,33 +281,15 @@ export default function RetraitPage() {
                   <p className="text-xs sm:text-sm">Aucun agent disponible</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {agents.map((agent) => {
-                    const address = JSON.parse(agent.address || '{}');
-                    return (
-                      <button
-                        key={agent.id}
-                        onClick={() => {
-                          setFormData({ ...formData, employeePaymentMethodId: agent.id });
-                          setSelectedAgent(agent);
-                        }}
-                        className={`w-full p-3 sm:p-4 border-2 rounded-lg text-left transition ${
-                          formData.employeePaymentMethodId === agent.id
-                            ? 'border-secondary bg-secondary/5'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="font-semibold text-sm sm:text-base">
-                          {agent.employee.firstName} {agent.employee.lastName}
-                        </div>
-                        <div className="text-xs sm:text-sm text-gray-600 mt-1">
-                          {address.city} - {address.street}
-                        </div>
-                        <div className="text-xs sm:text-sm text-gray-600">{address.establishment}</div>
-                      </button>
-                    );
-                  })}
-                </div>
+                <AgentSelect
+                  agents={agents}
+                  value={formData.employeePaymentMethodId}
+                  onChange={(value, agent) => {
+                    setFormData({ ...formData, employeePaymentMethodId: value });
+                    setSelectedAgent(agent);
+                  }}
+                  placeholder="Sélectionner un point de retrait..."
+                />
               )}
             </div>
 
@@ -368,15 +332,15 @@ export default function RetraitPage() {
             <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
               <h3 className="font-semibold text-green-900 mb-2 text-sm sm:text-base">Point de retrait</h3>
               {(() => {
-                const address = JSON.parse(selectedAgent.address || '{}');
+                const parts = (selectedAgent.address || '').split(',');
+                const street = parts[0]?.trim() || '';
+                const city = parts[1]?.trim() || '';
                 return (
-                  <div className="text-xs sm:text-sm text-green-800">
-                    <p className="font-semibold">{address.establishment}</p>
-                    <p>
-                      {address.street}, {address.city}
-                    </p>
+                  <div className="text-xs sm:text-sm text-green-800 space-y-1">
+                    {city && <p><span className="font-semibold">Ville :</span> {city}</p>}
+                    {street && <p><span className="font-semibold">Rue :</span> {street}</p>}
                     <p className="mt-2">
-                      Agent: {selectedAgent.employee.firstName} {selectedAgent.employee.lastName}
+                      <span className="font-semibold">Agent :</span> {selectedAgent.employee.firstName} {selectedAgent.employee.lastName}
                     </p>
                   </div>
                 );
@@ -386,13 +350,14 @@ export default function RetraitPage() {
             <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Phone className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                Votre contact
+                Numéro pour recevoir l'argent
               </label>
               <input
                 type="tel"
                 value={formData.clientContact}
                 onChange={(e) => setFormData({ ...formData, clientContact: e.target.value })}
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary text-sm sm:text-base"
+                placeholder="Ex: +22890000000"
               />
             </div>
 
