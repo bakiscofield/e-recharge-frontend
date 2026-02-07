@@ -207,17 +207,118 @@ export function SuperAdminHeader() {
             </button>
           </div>
 
-          {/* Mobile logout button */}
-          <div className="flex md:hidden flex-shrink-0">
+          {/* Mobile - Hamburger + Notifications */}
+          <div className="flex md:hidden items-center gap-1 flex-shrink-0">
+            {/* Notifications Mobile */}
             <button
-              onClick={() => setLogoutModalOpen(true)}
-              className="p-2 sm:p-3 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg active:bg-red-100 transition"
-              title="Déconnexion"
+              onClick={() => setNotificationPanelOpen(true)}
+              className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+              title="Notifications"
             >
-              <LogOut className="h-6 w-6 sm:h-7 sm:w-7" />
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+
+            {/* Hamburger Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+              title="Menu"
+            >
+              <Menu className="h-6 w-6" />
             </button>
           </div>
         </div>
+
+        {/* Mobile Drawer Menu */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/50"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Drawer */}
+            <div className="fixed inset-y-0 right-0 w-72 bg-white shadow-xl flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-primary" />
+                  <span className="font-semibold text-gray-900">Super Admin</span>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* User Info */}
+              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-semibold text-sm">
+                    {user?.firstName?.[0]}{user?.lastName?.[0]}
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">
+                      {user?.firstName} {user?.lastName}
+                    </div>
+                    <div className="text-xs text-gray-500">Super Administrateur</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="flex-1 overflow-y-auto py-2">
+                {navigation.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  const showBadge = item.href === '/admin/chat' && unreadCount > 0;
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        router.push(item.href);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`
+                        w-full px-4 py-3 flex items-center gap-3 relative transition-colors
+                        ${active
+                          ? 'bg-primary/10 text-primary border-r-2 border-primary'
+                          : 'text-gray-700 hover:bg-gray-50'
+                        }
+                      `}
+                    >
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      <span className="text-sm font-medium">{item.name}</span>
+                      {showBadge && (
+                        <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Logout */}
+              <div className="border-t border-gray-200 p-4">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setLogoutModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition font-medium text-sm"
+                >
+                  <LogOut className="h-5 w-5" />
+                  Déconnexion
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Logout Modal */}
         {logoutModalOpen && (

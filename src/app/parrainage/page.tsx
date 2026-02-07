@@ -14,6 +14,7 @@ export default function ParrainagePage() {
   const { user } = useSelector((state: RootState) => state.auth);
   const [balance, setBalance] = useState(0);
   const [withdrawalThreshold, setWithdrawalThreshold] = useState(2000);
+  const [commissionPercent, setCommissionPercent] = useState(5);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [amount, setAmount] = useState('');
@@ -37,6 +38,7 @@ export default function ParrainagePage() {
 
       setBalance(balanceRes.data.referralBalance || 0);
       setWithdrawalThreshold(balanceRes.data.withdrawalThreshold || 2000);
+      setCommissionPercent(balanceRes.data.commissionPercent ?? 5);
       setWithdrawals(withdrawalsRes.data);
     } catch (error) {
       toast.error('Erreur de chargement');
@@ -348,7 +350,7 @@ export default function ParrainagePage() {
 
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
                 <p className="text-sm text-gray-700">
-                  Partagez votre code avec vos amis. Vous recevez <strong className="text-primary">5%</strong> de commission sur chaque dépôt qu'ils effectuent !
+                  Partagez votre code avec vos amis. Vous recevez <strong className="text-primary">{commissionPercent}%</strong> de commission sur chaque dépôt qu'ils effectuent !
                 </p>
               </div>
             </motion.div>
