@@ -224,7 +224,7 @@ export default function InformationsPage() {
             {content.termsText || `En utilisant ${appName}, vous acceptez nos conditions d'utilisation et notre politique de confidentialite.`}
           </p>
           <p className="text-xs text-gray-500">
-            Version {content.version || '1.0.0'} - &copy; {new Date().getFullYear()} {appName}. Tous droits reserves.
+            Version {content.version || '1.1.0'} - &copy; {new Date().getFullYear()} {appName}. Tous droits reserves.
           </p>
         </div>
       </div>

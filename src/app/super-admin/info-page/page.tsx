@@ -54,7 +54,7 @@ export default function InfoPageEditor() {
     tiktok: '',
     faq: [],
     termsText: '',
-    version: '1.0.0',
+    version: '1.1.0',
   });
 
   useEffect(() => {

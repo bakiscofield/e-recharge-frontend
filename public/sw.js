@@ -7,7 +7,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 console.log('[SW] ✅ Firebase scripts loaded');
 
-const CACHE_VERSION = 'v2.0.1';
+const CACHE_VERSION = 'v2.1.0';
 const CACHE_NAMES = {
   static: `alicebot-static-${CACHE_VERSION}`,
   dynamic: `alicebot-dynamic-${CACHE_VERSION}`,
