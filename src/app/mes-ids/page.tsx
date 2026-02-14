@@ -5,6 +5,7 @@ import AppLayout from '@/components/Layout/AppLayout';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Plus, Trash2, Edit2, CreditCard, Building2 } from 'lucide-react';
+import BookmakerSelect from '@/components/BookmakerSelect';
 
 export default function MesIDsPage() {
   const [ids, setIds] = useState<any[]>([]);
@@ -106,20 +107,13 @@ export default function MesIDsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Bookmaker
                 </label>
-                <select
+                <BookmakerSelect
+                  bookmakers={bookmakers}
                   value={formData.bookmakerId}
-                  onChange={(e) => setFormData({ ...formData, bookmakerId: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                  required
+                  onChange={(value) => setFormData({ ...formData, bookmakerId: value })}
+                  placeholder="Sélectionner..."
                   disabled={!!editingId}
-                >
-                  <option value="">Sélectionner...</option>
-                  {bookmakers.map((bm) => (
-                    <option key={bm.id} value={bm.id}>
-                      {bm.name}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
