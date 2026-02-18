@@ -258,8 +258,8 @@ export default function AdminChatPage() {
       .includes(searchTerm.toLowerCase())
   );
 
-  // Composant de zone de messages (réutilisable pour desktop et modal)
-  const MessagesArea = ({ inModal = false }: { inModal?: boolean }) => (
+  // Render function (NOT a component) to avoid remounting on every keystroke
+  const renderMessagesArea = (inModal: boolean) => (
     <>
       {/* Header conversation */}
       <div className="bg-white border-b border-gray-200 p-4">
@@ -497,7 +497,7 @@ export default function AdminChatPage() {
         {/* Zone de messages - Desktop uniquement */}
         <div className="hidden md:flex flex-1 flex-col bg-gray-50">
           {selectedConversation ? (
-            <MessagesArea inModal={false} />
+            {renderMessagesArea(false)}
           ) : (
             <div className="flex-1 flex items-center justify-center text-gray-400">
               <div className="text-center">
@@ -526,7 +526,7 @@ export default function AdminChatPage() {
                 className="absolute inset-x-0 bottom-0 top-0 bg-gray-50 flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
-                <MessagesArea inModal={true} />
+                {renderMessagesArea(true)}
               </motion.div>
             </motion.div>
           )}

@@ -68,6 +68,8 @@ export default function SuperAdminChatPage() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isInputFocused = useRef(false);
 
   // Initialiser WebSocket
   useEffect(() => {
@@ -93,14 +95,18 @@ export default function SuperAdminChatPage() {
           return [...prev, message];
         });
       }
-      // Rafraîchir la liste des conversations
-      loadConversations();
+      // Rafraîchir la liste des conversations (seulement si input pas focus)
+      if (!isInputFocused.current) {
+        loadConversations();
+      }
     });
 
     newSocket.on('new_client_message', (data) => {
       console.log('New client message:', data);
       toast.success(`Nouveau message de ${data.sender.firstName} ${data.sender.lastName}`);
-      loadConversations();
+      if (!isInputFocused.current) {
+        loadConversations();
+      }
     });
 
     newSocket.on('conversation_closed', (data) => {
@@ -240,9 +246,11 @@ export default function SuperAdminChatPage() {
     }
   };
 
-  // Scroll vers le bas
+  // Scroll vers le bas (seulement si l'input n'est pas focus pour éviter le bug clavier)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!isInputFocused.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   // Filtrer les conversations
@@ -252,8 +260,8 @@ export default function SuperAdminChatPage() {
       .includes(searchTerm.toLowerCase())
   );
 
-  // Composant de zone de messages (réutilisable pour desktop et modal)
-  const MessagesArea = ({ inModal = false }: { inModal?: boolean }) => (
+  // Render function (NOT a component) to avoid remounting on every keystroke
+  const renderMessagesArea = (inModal: boolean) => (
     <>
       {/* Header conversation */}
       <div className="bg-white border-b border-gray-200 p-4">
@@ -358,8 +366,11 @@ export default function SuperAdminChatPage() {
           </button>
           <div className="flex-1">
             <textarea
+              ref={textareaRef}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
+              onFocus={() => { isInputFocused.current = true; }}
+              onBlur={() => { isInputFocused.current = false; }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -488,7 +499,7 @@ export default function SuperAdminChatPage() {
         {/* Zone de messages - Desktop uniquement */}
         <div className="hidden md:flex flex-1 flex-col bg-gray-50">
           {selectedConversation ? (
-            <MessagesArea inModal={false} />
+            renderMessagesArea(false)
           ) : (
             <div className="flex-1 flex items-center justify-center text-gray-400">
               <div className="text-center">
@@ -517,7 +528,7 @@ export default function SuperAdminChatPage() {
                 className="absolute inset-x-0 bottom-0 top-0 bg-gray-50 flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
-                <MessagesArea inModal={true} />
+                {renderMessagesArea(true)}
               </motion.div>
             </motion.div>
           )}
