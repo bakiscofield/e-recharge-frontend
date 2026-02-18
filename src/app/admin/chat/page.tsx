@@ -497,7 +497,7 @@ export default function AdminChatPage() {
         {/* Zone de messages - Desktop uniquement */}
         <div className="hidden md:flex flex-1 flex-col bg-gray-50">
           {selectedConversation ? (
-            {renderMessagesArea(false)}
+            renderMessagesArea(false)
           ) : (
             <div className="flex-1 flex items-center justify-center text-gray-400">
               <div className="text-center">
@@ -526,7 +526,7 @@ export default function AdminChatPage() {
                 className="absolute inset-x-0 bottom-0 top-0 bg-gray-50 flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
-                {renderMessagesArea(true)}
+                renderMessagesArea(true)
               </motion.div>
             </motion.div>
           )}
