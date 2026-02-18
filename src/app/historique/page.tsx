@@ -5,7 +5,7 @@ import AppLayout from '@/components/Layout/AppLayout';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { fetchOrders } from '@/store/slices/ordersSlice';
-import { ArrowDownCircle, ArrowUpCircle, Filter, Search, Download, FileText, Image as ImageIconLucide, X, Eye } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Filter, Search, Download, FileText, Image as ImageIconLucide, X, Eye, ExternalLink } from 'lucide-react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/fr';
 import { TransactionReceipt } from '@/components/Receipt/TransactionReceipt';
@@ -226,6 +226,22 @@ export default function HistoriquePage() {
                     <p className="text-sm text-red-800">
                       <strong>Raison:</strong> {order.cancellationReason}
                     </p>
+                  </div>
+                )}
+
+                {/* Payment link button for pending orders */}
+                {order.state === 'COMING' && order.employeePaymentMethod?.paymentLink && (
+                  <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p className="text-sm text-green-800 mb-2">
+                      Cliquez sur le bouton ci-dessous pour contacter l&apos;agent et finaliser votre demande :
+                    </p>
+                    <button
+                      onClick={() => window.open(order.employeePaymentMethod.paymentLink, '_blank')}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium text-sm active:scale-95"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Ouvrir le lien
+                    </button>
                   </div>
                 )}
 

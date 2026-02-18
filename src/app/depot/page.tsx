@@ -350,63 +350,81 @@ export default function DepotPage() {
         {/* Step 3: Informations */}
         {step === 3 && selectedAgent && (
           <div className="space-y-3">
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 sm:p-4">
-              <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Instructions</h3>
-              <ol className="list-decimal list-inside space-y-1 text-xs sm:text-sm text-gray-800">
-                <li>Composez le code USSD ci-dessous</li>
-                <li>Suivez les instructions de votre opérateur</li>
-                <li>Saisissez la référence SMS reçue</li>
-              </ol>
-            </div>
+            {/* Category "syntaxe" - USSD instructions */}
+            {(!selectedAgent.paymentMethod?.category || selectedAgent.paymentMethod?.category === 'syntaxe') && (
+              <>
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 sm:p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Instructions</h3>
+                  <ol className="list-decimal list-inside space-y-1 text-xs sm:text-sm text-gray-800">
+                    <li>Composez le code USSD ci-dessous</li>
+                    <li>Suivez les instructions de votre opérateur</li>
+                    <li>Saisissez la référence SMS reçue</li>
+                  </ol>
+                </div>
 
-            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-sm sm:text-base">Code USSD</h4>
-                <button
-                  onClick={() => {
-                    const syntaxe = selectedAgent.syntaxe?.replace('{montant}', formData.amount) || '';
-                    navigator.clipboard.writeText(syntaxe);
-                    setCopied(true);
-                    toast.success('Code copié !');
-                    setTimeout(() => setCopied(false), 2000);
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition ${
-                    copied
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-primary/10 text-primary hover:bg-primary/20'
-                  }`}
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4" />
-                      Copié
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4" />
-                      Copier
-                    </>
-                  )}
-                </button>
-              </div>
-              <div className="bg-gray-100 p-3 sm:p-4 rounded-lg font-mono text-base sm:text-lg text-center break-all">
-                {selectedAgent.syntaxe?.replace('{montant}', formData.amount)}
-              </div>
-            </div>
+                <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm sm:text-base">Code USSD</h4>
+                    <button
+                      onClick={() => {
+                        const syntaxe = selectedAgent.syntaxe?.replace('{montant}', formData.amount) || '';
+                        navigator.clipboard.writeText(syntaxe);
+                        setCopied(true);
+                        toast.success('Code copié !');
+                        setTimeout(() => setCopied(false), 2000);
+                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition ${
+                        copied
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-primary/10 text-primary hover:bg-primary/20'
+                      }`}
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          Copié
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4" />
+                          Copier
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="bg-gray-100 p-3 sm:p-4 rounded-lg font-mono text-base sm:text-lg text-center break-all">
+                    {selectedAgent.syntaxe?.replace('{montant}', formData.amount)}
+                  </div>
+                </div>
+              </>
+            )}
 
-            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Phone className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                Numéro utilisé pour le dépôt
-              </label>
-              <input
-                type="tel"
-                value={formData.clientContact}
-                onChange={(e) => setFormData({ ...formData, clientContact: e.target.value })}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
-                placeholder="Ex: +22890000000"
-              />
-            </div>
+            {/* Category "lien" - Info message */}
+            {selectedAgent.paymentMethod?.category === 'lien' && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                <h3 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">Information</h3>
+                <p className="text-xs sm:text-sm text-blue-800">
+                  Après soumission de votre demande, vous recevrez un lien pour contacter l'agent et finaliser votre dépôt.
+                </p>
+              </div>
+            )}
+
+            {/* Phone - hidden for "lien" */}
+            {(!selectedAgent.paymentMethod?.category || selectedAgent.paymentMethod?.category === 'syntaxe') && (
+              <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Phone className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  Numéro utilisé pour le dépôt
+                </label>
+                <input
+                  type="tel"
+                  value={formData.clientContact}
+                  onChange={(e) => setFormData({ ...formData, clientContact: e.target.value })}
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
+                  placeholder="Ex: +22890000000"
+                />
+              </div>
+            )}
 
             <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -493,19 +511,21 @@ export default function DepotPage() {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <CreditCard className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                Référence SMS
-              </label>
-              <input
-                type="text"
-                value={formData.referenceId}
-                onChange={(e) => setFormData({ ...formData, referenceId: e.target.value })}
-                placeholder="Ex: 1234567890"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
-              />
-            </div>
+            {(!selectedAgent.paymentMethod?.category || selectedAgent.paymentMethod?.category === 'syntaxe') && (
+              <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <CreditCard className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  Référence SMS
+                </label>
+                <input
+                  type="text"
+                  value={formData.referenceId}
+                  onChange={(e) => setFormData({ ...formData, referenceId: e.target.value })}
+                  placeholder="Ex: 1234567890"
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm sm:text-base"
+                />
+              </div>
+            )}
 
             <div className="flex gap-2 sm:gap-3">
               <button
@@ -533,6 +553,7 @@ export default function DepotPage() {
           router.push('/historique');
         }}
         type="DEPOT"
+        paymentLink={selectedAgent?.paymentLink}
       />
     </AppLayout>
   );

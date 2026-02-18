@@ -32,12 +32,13 @@ interface AgentAssignment {
   id: string;
   employee: Agent;
   bookmaker: Bookmaker;
-  paymentMethod: PaymentMethod;
+  paymentMethod: PaymentMethod & { category?: string };
   country: string;
   phoneNumber?: string;
   syntaxe?: string;
   frais: number;
   address?: string;
+  paymentLink?: string;
   isActive: boolean;
   createdAt: string;
 }
@@ -65,6 +66,7 @@ export default function AgentAssignmentsPage() {
     syntaxe: '',
     frais: 0,
     address: '',
+    paymentLink: '',
   });
 
   const [addressFields, setAddressFields] = useState({
@@ -130,6 +132,7 @@ export default function AgentAssignmentsPage() {
       syntaxe: '',
       frais: 0,
       address: '',
+      paymentLink: '',
     });
     setAddressFields({
       street: '',
@@ -161,6 +164,7 @@ export default function AgentAssignmentsPage() {
       syntaxe: assignment.syntaxe || '',
       frais: assignment.frais,
       address: assignment.address || '',
+      paymentLink: assignment.paymentLink || '',
     });
     setAddressFields({
       street,
@@ -200,6 +204,7 @@ export default function AgentAssignmentsPage() {
           syntaxe: formData.syntaxe,
           frais: formData.frais,
           address: fullAddress,
+          paymentLink: formData.paymentLink || null,
         });
         toast.success('Assignation mise à jour');
       } else {
@@ -207,6 +212,7 @@ export default function AgentAssignmentsPage() {
         await api.post('/super-admin/agent-assignments', {
           ...formData,
           address: fullAddress,
+          paymentLink: formData.paymentLink || null,
         });
         toast.success('Assignation créée');
       }
@@ -340,6 +346,15 @@ export default function AgentAssignmentsPage() {
                             }`}
                           >
                             {assignment.isActive ? 'Actif' : 'Inactif'}
+                          </span>
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-semibold ${
+                              assignment.paymentMethod.category === 'lien'
+                                ? 'bg-blue-500/20 text-blue-400'
+                                : 'bg-orange-500/20 text-orange-400'
+                            }`}
+                          >
+                            {assignment.paymentMethod.category === 'lien' ? 'Lien' : 'Syntaxe'}
                           </span>
                         </div>
                       </div>
@@ -603,6 +618,23 @@ export default function AgentAssignmentsPage() {
                 />
                 <p className="text-xs text-gray-400 mt-1">
                   Utilisez {'{montant}'} pour le montant dynamique
+                </p>
+              </div>
+
+              {/* Lien de paiement */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Lien de paiement
+                </label>
+                <input
+                  type="url"
+                  value={formData.paymentLink}
+                  onChange={(e) => setFormData({ ...formData, paymentLink: e.target.value })}
+                  placeholder="https://example.com/paiement"
+                  className="w-full px-4 py-3 bg-[#0a0a1f] border border-purple-500/30 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  URL vers laquelle le client sera redirigé (pour les moyens de paiement de type "lien")
                 </p>
               </div>
 

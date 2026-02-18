@@ -40,6 +40,7 @@ interface PaymentMethod {
   maxAmount: number;
   fees: number;
   countries?: string;
+  category?: string;
 }
 
 interface AppBranding {
@@ -152,10 +153,10 @@ export default function ConfigurationPage() {
     setSaving(true);
     try {
       if (editingPayment.id) {
-        await api.put(`/payment-methods/${editingPayment.id}`, editingPayment);
+        await api.put(`/admin/payment-methods/${editingPayment.id}`, editingPayment);
         toast.success('Méthode de paiement mise à jour!');
       } else {
-        await api.post('/payment-methods', editingPayment);
+        await api.post('/admin/payment-methods', editingPayment);
         toast.success('Méthode de paiement créée!');
       }
       setEditingPayment(null);
@@ -171,7 +172,7 @@ export default function ConfigurationPage() {
   const deletePaymentMethod = async (id: string) => {
     if (!confirm('Supprimer cette méthode de paiement?')) return;
     try {
-      await api.delete(`/payment-methods/${id}`);
+      await api.delete(`/admin/payment-methods/${id}`);
       toast.success('Méthode supprimée!');
       loadConfiguration();
     } catch (error) {
@@ -567,7 +568,8 @@ export default function ConfigurationPage() {
                         isActive: true,
                         minAmount: 500,
                         maxAmount: 100000,
-                        fees: 0
+                        fees: 0,
+                        category: 'syntaxe',
                       })}
                     >
                       <Plus className="w-4 h-4" />
@@ -606,7 +608,7 @@ export default function ConfigurationPage() {
                           <div>Max: {method.maxAmount} FCFA</div>
                           <div>Frais: {method.fees}%</div>
                         </div>
-                        <div className="mt-2">
+                        <div className="mt-2 flex gap-2">
                           <span
                             className={`px-2 py-1 text-xs rounded ${
                               method.isActive
@@ -615,6 +617,15 @@ export default function ConfigurationPage() {
                             }`}
                           >
                             {method.isActive ? 'Actif' : 'Inactif'}
+                          </span>
+                          <span
+                            className={`px-2 py-1 text-xs rounded ${
+                              method.category === 'lien'
+                                ? 'bg-blue-500/20 text-blue-600'
+                                : 'bg-orange-500/20 text-orange-600'
+                            }`}
+                          >
+                            {method.category === 'lien' ? 'Lien' : 'Syntaxe'}
                           </span>
                         </div>
                       </div>
@@ -662,6 +673,37 @@ export default function ConfigurationPage() {
                           <option value="CRYPTO">Crypto</option>
                           <option value="CARD">Carte bancaire</option>
                         </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-2">
+                          Catégorie
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="pm-category"
+                              checked={editingPayment.category !== 'lien'}
+                              onChange={() => setEditingPayment({ ...editingPayment, category: 'syntaxe' })}
+                              className="w-4 h-4 text-cyan-500 focus:ring-cyan-500"
+                            />
+                            <span className="text-sm text-gray-700">Syntaxe USSD</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="pm-category"
+                              checked={editingPayment.category === 'lien'}
+                              onChange={() => setEditingPayment({ ...editingPayment, category: 'lien' })}
+                              className="w-4 h-4 text-cyan-500 focus:ring-cyan-500"
+                            />
+                            <span className="text-sm text-gray-700">Lien de paiement</span>
+                          </label>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          "Syntaxe" affiche un code USSD au client. "Lien" affiche un lien vers l'agent après soumission.
+                        </p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">

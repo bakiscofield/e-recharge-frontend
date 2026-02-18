@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, X, Clock } from 'lucide-react';
+import { CheckCircle, X, Clock, ExternalLink } from 'lucide-react';
 
 interface WaitingModalProps {
   isOpen: boolean;
@@ -11,6 +11,7 @@ interface WaitingModalProps {
   message?: string;
   type: 'DEPOT' | 'RETRAIT';
   autoCloseDuration?: number; // in milliseconds
+  paymentLink?: string;
 }
 
 export function WaitingModal({
@@ -20,19 +21,22 @@ export function WaitingModal({
   message,
   type,
   autoCloseDuration = 5000,
+  paymentLink,
 }: WaitingModalProps) {
-  const [timeLeft, setTimeLeft] = useState(autoCloseDuration / 1000);
+  const hasPaymentLink = !!paymentLink;
+  const effectiveDuration = hasPaymentLink ? 30000 : autoCloseDuration;
+  const [timeLeft, setTimeLeft] = useState(effectiveDuration / 1000);
 
   useEffect(() => {
     if (!isOpen) {
-      setTimeLeft(autoCloseDuration / 1000);
+      setTimeLeft(effectiveDuration / 1000);
       return;
     }
 
-    // Auto-close timer
+    // Auto-close timer (longer for payment links)
     const closeTimer = setTimeout(() => {
       onClose();
-    }, autoCloseDuration);
+    }, effectiveDuration);
 
     // Countdown timer
     const countdownInterval = setInterval(() => {
@@ -49,7 +53,7 @@ export function WaitingModal({
       clearTimeout(closeTimer);
       clearInterval(countdownInterval);
     };
-  }, [isOpen, autoCloseDuration, onClose]);
+  }, [isOpen, effectiveDuration, onClose]);
 
   const defaultTitle = type === 'DEPOT'
     ? '✅ Dépôt créé avec succès !'
@@ -59,7 +63,7 @@ export function WaitingModal({
     ? 'Votre demande de dépôt a été envoyée à un agent. Vous serez notifié dès qu\'elle sera traitée.'
     : 'Votre demande de retrait a été envoyée à un agent. Vous serez notifié dès qu\'elle sera traitée.';
 
-  const progress = (timeLeft / (autoCloseDuration / 1000)) * 100;
+  const progress = (timeLeft / (effectiveDuration / 1000)) * 100;
 
   return (
     <AnimatePresence>
@@ -106,6 +110,22 @@ export function WaitingModal({
                 {message || defaultMessage}
               </p>
 
+              {/* Payment Link Button */}
+              {hasPaymentLink && (
+                <div className="mt-4 p-3 sm:p-4 rounded-xl bg-green-50 border border-green-200">
+                  <p className="text-sm text-green-800 font-medium mb-3">
+                    Cliquez sur le bouton ci-dessous pour contacter l'agent et finaliser votre demande :
+                  </p>
+                  <button
+                    onClick={() => window.open(paymentLink, '_blank')}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition active:scale-95"
+                  >
+                    <ExternalLink className="h-5 w-5" />
+                    Ouvrir le lien
+                  </button>
+                </div>
+              )}
+
               {/* Info cards */}
               <div className={`mt-4 p-3 sm:p-4 rounded-xl ${type === 'DEPOT' ? 'bg-blue-50' : 'bg-purple-50'} border ${type === 'DEPOT' ? 'border-blue-100' : 'border-purple-100'}`}>
                 <div className="flex items-start gap-2">
@@ -115,9 +135,19 @@ export function WaitingModal({
                       Que faire maintenant ?
                     </p>
                     <ul className="text-xs sm:text-sm text-gray-600 space-y-1 list-disc list-inside">
-                      <li>Vérifiez l'historique pour suivre votre demande</li>
-                      <li>Un agent vous contactera bientôt</li>
-                      <li>Vous recevrez une notification à chaque étape</li>
+                      {hasPaymentLink ? (
+                        <>
+                          <li>Ouvrez le lien ci-dessus pour contacter l'agent</li>
+                          <li>Suivez les instructions de l'agent</li>
+                          <li>Vous recevrez une notification une fois traité</li>
+                        </>
+                      ) : (
+                        <>
+                          <li>Vérifiez l'historique pour suivre votre demande</li>
+                          <li>Un agent vous contactera bientôt</li>
+                          <li>Vous recevrez une notification à chaque étape</li>
+                        </>
+                      )}
                     </ul>
                   </div>
                 </div>

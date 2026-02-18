@@ -329,6 +329,7 @@ export default function RetraitPage() {
         {/* Step 3: Informations */}
         {step === 3 && selectedAgent && (
           <div className="space-y-3">
+            {/* Address - always shown */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
               <h3 className="font-semibold text-green-900 mb-2 text-sm sm:text-base">Point de retrait</h3>
               {(() => {
@@ -347,19 +348,32 @@ export default function RetraitPage() {
               })()}
             </div>
 
-            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Phone className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                Numéro pour recevoir l'argent
-              </label>
-              <input
-                type="tel"
-                value={formData.clientContact}
-                onChange={(e) => setFormData({ ...formData, clientContact: e.target.value })}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary text-sm sm:text-base"
-                placeholder="Ex: +22890000000"
-              />
-            </div>
+            {/* Category "lien" - Info message */}
+            {selectedAgent.paymentMethod?.category === 'lien' && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                <h3 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">Information</h3>
+                <p className="text-xs sm:text-sm text-blue-800">
+                  Après soumission de votre demande, vous recevrez un lien pour contacter l'agent et finaliser votre retrait.
+                </p>
+              </div>
+            )}
+
+            {/* Phone - hidden for "lien" */}
+            {(!selectedAgent.paymentMethod?.category || selectedAgent.paymentMethod?.category === 'syntaxe') && (
+              <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Phone className="inline h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  Numéro pour recevoir l'argent
+                </label>
+                <input
+                  type="tel"
+                  value={formData.clientContact}
+                  onChange={(e) => setFormData({ ...formData, clientContact: e.target.value })}
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary text-sm sm:text-base"
+                  placeholder="Ex: +22890000000"
+                />
+              </div>
+            )}
 
             <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -490,6 +504,7 @@ export default function RetraitPage() {
           router.push('/historique');
         }}
         type="RETRAIT"
+        paymentLink={selectedAgent?.paymentLink}
       />
     </AppLayout>
   );
