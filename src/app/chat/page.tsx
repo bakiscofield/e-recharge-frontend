@@ -17,6 +17,7 @@ import {
   Check,
   CheckCheck,
   Loader2,
+  FileText,
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +30,7 @@ interface Message {
   senderId: string;
   createdAt: string;
   isRead: boolean;
+  attachmentUrl?: string;
   sender: {
     id: string;
     firstName: string;
@@ -58,6 +60,10 @@ interface Conversation {
   messages: Message[];
 }
 
+function isImage(url: string): boolean {
+  return /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url);
+}
+
 export default function ChatPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -68,7 +74,10 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialiser WebSocket
   useEffect(() => {
@@ -231,6 +240,57 @@ export default function ChatPage() {
     }
   };
 
+  // Envoyer un fichier
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !conversation || !user) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const token = localStorage.getItem('token');
+      const uploadRes = await fetch(`${api.defaults.baseURL}/upload/document`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      if (!uploadRes.ok) throw new Error('Upload failed');
+      const { url: attachmentUrl } = await uploadRes.json();
+
+      const optimisticMessage: Message = {
+        id: `temp-${Date.now()}`,
+        content: '',
+        attachmentUrl,
+        senderId: user.id,
+        createdAt: new Date().toISOString(),
+        isRead: false,
+        sender: {
+          id: user.id,
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          avatar: user.avatar,
+          role: user.role,
+        },
+      };
+      setMessages((prev) => [...prev, optimisticMessage]);
+
+      if (socket) {
+        socket.emit('send_message', {
+          conversationId: conversation.id,
+          senderId: user.id,
+          content: '',
+          attachmentUrl,
+        });
+      }
+    } catch (error) {
+      toast.error('Erreur lors de l\'envoi du fichier');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   // Scroll vers le bas
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -315,9 +375,33 @@ export default function ChatPage() {
                           </p>
                         </div>
                       )}
-                      <p className="whitespace-pre-wrap break-words text-sm sm:text-base">
-                        {message.content}
-                      </p>
+                      {message.content && (
+                        <p className="whitespace-pre-wrap break-words text-sm sm:text-base">
+                          {message.content}
+                        </p>
+                      )}
+                      {message.attachmentUrl && (
+                        !brokenImages[message.id] && isImage(message.attachmentUrl) ? (
+                          <img
+                            src={message.attachmentUrl}
+                            crossOrigin="anonymous"
+                            className="max-w-[200px] rounded-lg mt-2 cursor-pointer block"
+                            onClick={() => window.open(message.attachmentUrl)}
+                            alt="image"
+                            onError={() => setBrokenImages(prev => ({ ...prev, [message.id]: true }))}
+                          />
+                        ) : (
+                          <a
+                            href={message.attachmentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 mt-2 underline text-sm"
+                          >
+                            <FileText className="h-4 w-4" />
+                            {message.attachmentUrl.split('/').pop() || 'fichier'}
+                          </a>
+                        )
+                      )}
                       <div
                         className={`flex items-center justify-end gap-1 mt-1 text-xs ${
                           isMe ? 'text-white/70' : 'text-gray-500'
@@ -352,9 +436,20 @@ export default function ChatPage() {
         {/* Input message */}
         <div className="bg-white border-t border-gray-200 p-3 sm:p-4">
           <div className="flex items-end gap-2">
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors hidden sm:block">
-              <Paperclip className="h-5 w-5 text-gray-500" />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors hidden sm:block"
+            >
+              {uploading ? <Loader2 className="h-5 w-5 text-gray-500 animate-spin" /> : <Paperclip className="h-5 w-5 text-gray-500" />}
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+              onChange={handleFileSelect}
+            />
             <div className="flex-1">
               <textarea
                 value={newMessage}

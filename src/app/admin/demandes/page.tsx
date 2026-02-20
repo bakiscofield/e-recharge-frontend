@@ -353,16 +353,6 @@ export default function DemandesPage() {
                         </div>
                       )}
 
-                      {/* Numéro marchand */}
-                      {order.employeePaymentMethod.phoneNumber && (
-                        <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg sm:rounded-xl p-3 sm:p-4">
-                          <div className="text-xs font-medium text-green-700 mb-1 flex items-center gap-1">
-                            💳 Numéro marchand
-                          </div>
-                          <div className="font-mono text-sm sm:text-base font-semibold text-gray-900">{order.employeePaymentMethod.phoneNumber}</div>
-                        </div>
-                      )}
-
                       {/* Date */}
                       <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-500 pt-1.5 sm:pt-2 border-t border-gray-100">
                         <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

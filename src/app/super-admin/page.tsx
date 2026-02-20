@@ -101,7 +101,6 @@ export default function SuperAdminDashboard() {
     firstName: '',
     lastName: '',
     phone: '',
-    password: '',
     country: 'TG',
     role: 'AGENT',
   });
@@ -258,7 +257,7 @@ export default function SuperAdminDashboard() {
       const response = await api.post('/super-admin/agents', agentFormData);
       const assignmentsCount = response.data?.assignmentsCreated || 0;
       toast.success(
-        `Agent créé avec succès ! ${assignmentsCount} assignation(s) automatique(s) créée(s).`
+        `Agent créé avec succès ! Le mot de passe a été envoyé par email. ${assignmentsCount} assignation(s) automatique(s) créée(s).`
       );
       setShowAgentModal(false);
       resetAgentForm();
@@ -315,7 +314,6 @@ export default function SuperAdminDashboard() {
       firstName: agent.firstName,
       lastName: agent.lastName,
       phone: agent.phone,
-      password: '',
       country: 'TG',
       role: agent.role,
     });
@@ -328,7 +326,6 @@ export default function SuperAdminDashboard() {
       firstName: '',
       lastName: '',
       phone: '',
-      password: '',
       country: 'TG',
       role: 'AGENT',
     });
@@ -1377,15 +1374,10 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 {!editingAgent && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
-                    <input
-                      type="password"
-                      value={agentFormData.password}
-                      onChange={(e) => setAgentFormData({ ...agentFormData, password: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                      required
-                    />
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-700">
+                      Un mot de passe sera automatiquement généré et envoyé par email à l'agent.
+                    </p>
                   </div>
                 )}
 

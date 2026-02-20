@@ -53,7 +53,7 @@ export function SuperAdminHeader() {
     { name: 'Page Info', href: '/super-admin/info-page', icon: Info },
     { name: 'Annonces', href: '/super-admin/annonces', icon: Megaphone },
     { name: 'Coupons', href: '/super-admin/coupons', icon: Ticket },
-    { name: 'Chat', href: '/admin/chat', icon: MessageSquare },
+    { name: 'Chat', href: '/super-admin/chat', icon: MessageSquare },
   ];
 
   // Items principaux à afficher dans le header desktop (5 éléments)
@@ -100,7 +100,7 @@ export function SuperAdminHeader() {
             {primaryNavigation.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              const showBadge = item.href === '/admin/chat' && unreadCount > 0;
+              const showBadge = item.href === '/super-admin/chat' && unreadCount > 0;
               return (
                 <button
                   key={item.name}
@@ -148,7 +148,7 @@ export function SuperAdminHeader() {
                     {secondaryNavigation.map((item) => {
                       const Icon = item.icon;
                       const active = isActive(item.href);
-                      const showBadge = item.href === '/admin/chat' && unreadCount > 0;
+                      const showBadge = item.href === '/super-admin/chat' && unreadCount > 0;
                       return (
                         <button
                           key={item.name}
@@ -275,7 +275,7 @@ export function SuperAdminHeader() {
                 {navigation.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
-                  const showBadge = item.href === '/admin/chat' && unreadCount > 0;
+                  const showBadge = item.href === '/super-admin/chat' && unreadCount > 0;
                   return (
                     <button
                       key={item.name}

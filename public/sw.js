@@ -323,6 +323,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Laisser le navigateur gérer directement les fichiers uploadés (cross-origin)
+  if (url.pathname.startsWith('/uploads/')) {
+    return;
+  }
+
   event.respondWith(
     (async () => {
       try {
